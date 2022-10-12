@@ -14,6 +14,7 @@ export default async function redirectToAuth(req, res) {
 
     if(sha_result !== req.query.hmac) return res.status(401).send('Verification failed');
     
+    console.log('redirectToAuth');
     const redirectUrl = await Shopify.Auth.beginAuth(
         req,
         res,

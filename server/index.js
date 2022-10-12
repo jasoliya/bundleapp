@@ -40,7 +40,7 @@ export async function createAppServer(
         
         if(shop) {
             const appInstalled = await AppInstallation.includes(shop);
-            
+            console.log(`appInstalled: ${appInstalled}`);
             if(!appInstalled) {
                 return redirectToAuth(req, res);
             } else {

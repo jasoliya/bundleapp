@@ -1,6 +1,7 @@
 import { join } from 'path';
 import express from 'express';
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
 import { Shopify, LATEST_API_VERSION } from '@shopify/shopify-api';
 import applyAuthMiddleware from './middleware/auth.js';
 import { AppInstallation } from './app_installations.js';
@@ -28,6 +29,8 @@ export async function createAppServer(
     isProd = process.env.NODE_ENV === "production"
 ) {
     const app = express();
+    
+    app.use(cookieParser(Shopify.Context.API_SECRET_KEY));
 
     applyAuthMiddleware(app);
 
@@ -40,7 +43,7 @@ export async function createAppServer(
         
         if(shop) {
             const appInstalled = await AppInstallation.includes(shop);
-            console.log(`appInstalled: ${appInstalled}`);
+            
             if(!appInstalled) {
                 return redirectToAuth(req, res);
             } else {

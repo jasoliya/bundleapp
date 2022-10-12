@@ -18,7 +18,7 @@ export default async function redirectToAuth(req, res) {
         req,
         res,
         req.query.shop,
-        '/api/auth/callback',
+        '/auth/callback',
         false
     );
 

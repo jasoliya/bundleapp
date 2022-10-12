@@ -1,9 +1,7 @@
 import { Shopify } from '@shopify/shopify-api';
 
 export default function applyAuthMiddleware(app) {
-    console.log('call middleware');
-    app.get('/api/auth/callback', async (req, res) => {
-        console.log('call callback');
+    app.get('/auth/callback', async (req, res) => {
         try {
             const session = await Shopify.Auth.validateAuthCallback(
                 req,

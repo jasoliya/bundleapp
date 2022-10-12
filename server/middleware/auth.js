@@ -13,7 +13,7 @@ export default function applyAuthMiddleware(app) {
                 shop: session.shop,
                 accessToken: session.accessToken
             });
-            console.log(Object.entries(response));
+            
             Object.entries(response).map(([topic, response]) => {
                 console.log(`Register ${topic} webhook: ${response.success}`);
             });

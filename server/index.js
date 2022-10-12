@@ -24,6 +24,14 @@ Shopify.Context.initialize({
     SESSION_STORAGE: new Shopify.Session.SQLiteSessionStorage(DB_PATH)
 });
 
+Shopify.Webhooks.Registry.addHandler('APP_UNINSTALLED', {
+    path: '/webhooks',
+    webhookHandler: async (_topic, shop, _body) => {
+        console.log('App uninstalled');
+        await AppInstallation.delete(shop);
+    }
+})
+
 export async function createAppServer(
     root = process.cwd(),
     isProd = process.env.NODE_ENV === "production"
@@ -33,6 +41,14 @@ export async function createAppServer(
     app.use(cookieParser(Shopify.Context.API_SECRET_KEY));
 
     applyAuthMiddleware(app);
+
+    app.post('/webhooks', async (req, res) => {
+        try {
+            await Shopify.Webhooks.Registry.process(req, res);
+        } catch (e) {
+            console.log(`Failed to process webhook ${e.message}`);
+        }
+    });
 
     app.get('/api', async (req, res) => {
         res.status(200).send({success: true});

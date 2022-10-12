@@ -13,7 +13,7 @@ export default async function redirectToAuth(req, res) {
     sha_result = sha_result.digest('hex');
 
     if(sha_result !== req.query.hmac) return res.status(401).send('Verification failed');
-
+    
     const redirectUrl = await Shopify.Auth.beginAuth(
         req,
         res,

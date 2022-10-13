@@ -28,7 +28,4 @@ dist-ssr
 
 # Database
 database.sqlite
-<<<<<<< HEAD
 shopify.web.toml
-=======
->>>>>>> 68a45afb273e4932bc01808d12b4ce23448223dd

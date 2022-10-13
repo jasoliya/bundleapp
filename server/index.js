@@ -54,6 +54,7 @@ export async function createAppServer(
         res.status(200).send({success: true});
     });
 
+<<<<<<< HEAD
     app.use((req, res, next) => {
         const shop = req.query.shop;
         if(shop) {
@@ -65,6 +66,8 @@ export async function createAppServer(
         next();
     });
 
+=======
+>>>>>>> 68a45afb273e4932bc01808d12b4ce23448223dd
     app.use('/*', async (req, res, next) => {
         const { shop } = req.query;
         

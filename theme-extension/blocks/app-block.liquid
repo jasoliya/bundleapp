@@ -1,0 +1,24 @@
+<button class="button-codify-bundle {{ block.settings.custom_class }}" data-add-bundle>{{ block.settings.button_text }}</button>
+
+{% schema %}
+{
+    "name": "Add bundle button",
+    "templates": ["product"],
+    "target": "section",
+    "stylesheet": "styles.css",
+    "javascript": "app.js",
+    "settings": [
+        {
+            "type": "text",
+            "id": "button_text",
+            "label": "Button text",
+            "default": "Add bundle"
+        },
+        {
+            "type": "text",
+            "id": "custom_class",
+            "label": "Custom class"
+        }
+    ]
+}
+{% endschema %}

@@ -14,8 +14,8 @@ export default function HomePage() {
                 <Layout.Section>
                     <Card sectioned>
                         <TextContainer spacing='loose'>
-                            <Heading>Welcome</Heading>
-                            <p>View summary of your bundle 🎉</p>
+                            <Heading>Welcome 🎉</Heading>
+                            <p>View summary of your bundle</p>
                         </TextContainer>                        
                     </Card>
                 </Layout.Section>

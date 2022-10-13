@@ -1,4 +1,5 @@
-<button class="button-codify-bundle {{ block.settings.custom_class }}" data-add-bundle>{{ block.settings.button_text }}</button>
+{%- assign variant = product.selected_or_first_available_variant -%}
+<button class="button-codify-bundle {{ block.settings.custom_class }}" data-add-bundle={{ variant.id }}{% unless variant.available %} disabled{% endunless %}>{{ block.settings.button_text }}</button>
 
 {% schema %}
 {

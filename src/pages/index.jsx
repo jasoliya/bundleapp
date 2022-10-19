@@ -6,7 +6,6 @@ import {
     Heading
 } from '@shopify/polaris';
 
-
 export default function HomePage() {
     return (
         <Page narrowWidth>

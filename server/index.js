@@ -4,8 +4,10 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { Shopify, LATEST_API_VERSION } from '@shopify/shopify-api';
 import applyAuthMiddleware from './middleware/auth.js';
+import verifyRequest from './middleware/verify-request.js';
 import { AppInstallation } from './app_installations.js';
 import redirectToAuth from './helpers/redirect-to-auth.js';
+import apiEndPoints from './middleware/api.js';
 
 dotenv.config();
 
@@ -50,9 +52,11 @@ export async function createAppServer(
         }
     });
 
-    app.get('/api', async (req, res) => {
-        res.status(200).send({success: true});
-    });
+    app.use('/api/*', verifyRequest(app));
+
+    app.use(express.json());
+
+    apiEndPoints(app);
 
     app.use((req, res, next) => {
         const shop = req.query.shop;
@@ -79,6 +83,10 @@ export async function createAppServer(
         } else {
             next();
         }
+    });
+
+    app.get('/bundle', async (req, res) => {
+        res.status(200).send({success: true});
     });
 
     let vite;

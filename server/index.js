@@ -90,10 +90,7 @@ export async function createAppServer(
     app.get('/bundle', async (req, res) => {
         res
             .status(200)
-            .set({
-                'ngrok-skip-browser-warning': '390005',
-                'Content-Type': 'text/html'
-            })            
+            .set('Content-Type','application/liquid')            
             .send(fs.readFileSync(`${process.cwd()}/public/bundle.html`));
     });
 

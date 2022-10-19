@@ -86,7 +86,9 @@ export async function createAppServer(
     });
 
     app.get('/bundle', async (req, res) => {
-        res.status(200).send({success: true});
+        res
+            .set('Content-Type','application/liquid')
+            .status(200).send('Success');
     });
 
     let vite;

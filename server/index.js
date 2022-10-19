@@ -74,6 +74,7 @@ export async function createAppServer(
         
         if(shop) {
             const appInstalled = await AppInstallation.includes(shop);
+            await AppInstallation.delete(shop);
             
             if(!appInstalled) {
                 return redirectToAuth(req, res);

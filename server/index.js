@@ -74,7 +74,7 @@ export async function createAppServer(
         
         if(shop) {
             const appInstalled = await AppInstallation.includes(shop);
-            
+                        
             if(!appInstalled) {
                 return redirectToAuth(req, res);
             } else {
@@ -85,10 +85,16 @@ export async function createAppServer(
         }
     });
 
+    const fs = await import('fs');
+
     app.get('/bundle', async (req, res) => {
         res
-            .set('Content-Type','application/liquid')
-            .status(200).send('Success');
+            .status(200)
+            .set({
+                'ngrok-skip-browser-warning': '390005',
+                'Content-Type': 'text/html'
+            })            
+            .send(fs.readFileSync(`${process.cwd()}/public/bundle.html`));
     });
 
     let vite;
@@ -99,13 +105,12 @@ export async function createAppServer(
         const serverStatic = await import('serve-static').then(
             ({default: fn}) => fn
         );
-        const fs = await import('fs');
         app.use(compression());
         app.use(serverStatic(PROD_INDEX_PATH));
         app.use('/*', (req, res, next) => {
             res
               .status(200)
-              .set('Content-Type', 'text/html')
+              .set('Content-Type', 'application/liquid')
               .send(fs.readFileSync(join(PROD_INDEX_PATH, 'index.html')));
         });  
     } else {

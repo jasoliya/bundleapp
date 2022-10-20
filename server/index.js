@@ -90,7 +90,7 @@ export async function createAppServer(
     app.get('/bundle', async (req, res) => {
         res
             .status(200)
-            .set('Content-Type','application/liquid')            
+            .set('Content-Type',isProd ? 'application/liquid' : 'text/html')            
             .send(fs.readFileSync(`${process.cwd()}/public/bundle.html`));
     });
 

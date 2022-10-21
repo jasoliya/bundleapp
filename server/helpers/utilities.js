@@ -12,7 +12,7 @@ export function serialize(obj) {
 export async function getSession(req, res) {
     const session = await Shopify.Utils.loadCurrentSession(req, res, false);
     if(!session) {
-        res.status(401).send("Couldn't find a Shopify session");
+        res.status(401).send({error: "Couldn't find a Shopify session"});
     } else {
         return session;
     }

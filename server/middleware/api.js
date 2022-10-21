@@ -37,7 +37,7 @@ export default function apiEndPoints(app) {
             
             const parsedMeta = JSON.parse(metaValue);
             const bundle = parsedMeta.bundles[id];
-            if(bundle === undefined) return res.status(401).send("Couldn't find bundle");
+            if(bundle === undefined) return res.status(401).send({error: "Couldn't find bundle"});
             let query = bundle.products.split('||');
             query = query.map((item) => {
                 const item_id = item.split('=')[0];

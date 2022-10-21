@@ -1,22 +1,44 @@
 import { Card, EmptyState, Form, Icon, Layout, Link, Stack, Text, TextField, TextStyle, Thumbnail } from "@shopify/polaris";
-import { ContextualSaveBar, ResourcePicker } from '@shopify/app-bridge-react';
+import { ContextualSaveBar, ResourcePicker, useNavigate } from '@shopify/app-bridge-react';
 import { useCallback, useState } from "react";
 import { useForm, useField, notEmptyString } from '@shopify/react-form';
 import { imageURL } from '../helper';
 import { ImageMajor, AlertMinor } from '@shopify/polaris-icons';
+import { useAuthenticatedFetch } from '../hooks';
 
-
-const convertProductsToString = (products) => products.map((product) => product.handle).join('||');
+const convertProductsToString = (products) => {
+    return products.map((product) => {
+        const product_id = product.id.split('/').pop();
+        return `${product_id}=${product.handle}`
+    }).join('||');
+}
 
 export function BundleForm() {
+    const fetch = useAuthenticatedFetch();
+    const navigate = useNavigate();
     const [showProductPicker, setShowProductPicker] = useState(false);
     const [selectedProducts, setSelectedProducts] = useState([]);
 
-    const onSubmit = (body) => {
-        console.log(body);
-        makeClean();
-        return { status: "success" };
-    }
+    const onSubmit = useCallback(
+        (body) => {
+            (async () => {
+                const uid = parseInt(Date.now() + Math.random());
+                body['id'] =  uid;
+                const response = await fetch('/api/bundles', {
+                    method: 'POST',
+                    body: JSON.stringify(body),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if(response.ok) {
+                    makeClean();
+                    await response.json();
+                    navigate(`/bundles/${uid}`);
+                }
+            })();
+            return { status: "success" }
+        }, 
+        []
+    )
 
     const {
         fields: {
@@ -81,6 +103,10 @@ export function BundleForm() {
         setShowProductPicker(false);
     },[]);
 
+    const handleFormReset = () => {
+        setSelectedProducts([]);
+    }
+
     const handleRemove = useCallback((handle) => {
         const products = selectedProducts.filter((product) => {
             return product.handle !== handle
@@ -110,7 +136,10 @@ export function BundleForm() {
                         }}
                         discardAction={{
                             label: "Discard",
-                            onAction: reset,
+                            onAction: () => {
+                                reset();
+                                handleFormReset();
+                            },
                             loading: submitting,
                             disabled: submitting
                         }}

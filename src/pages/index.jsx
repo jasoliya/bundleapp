@@ -11,7 +11,7 @@ export default function HomePage() {
 
     const primaryAction = {
         content: 'Create bundle',
-        url: '/new'
+        url: '/bundles/new'
     }
 
     return (
@@ -26,7 +26,7 @@ export default function HomePage() {
                     action={{
                         content: 'Create bundle',
                         onAction: () => {
-                            navigate('/new')
+                            navigate('/bundles/new')
                         }
                     }}
                     image={emptyImage}

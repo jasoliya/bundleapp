@@ -1,6 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import { AppBridgeProvider } from './components';
-import { PolarisProvider } from './components';
+import { AppBridgeProvider, PolarisProvider, QueryProvider } from './components';
 import Routes from './Routes';
 import "@shopify/polaris/build/esm/styles.css";
 
@@ -11,7 +10,9 @@ function App() {
     <BrowserRouter>
       <PolarisProvider>
         <AppBridgeProvider>
-          <Routes pages={pages}/>
+          <QueryProvider>
+            <Routes pages={pages}/>
+          </QueryProvider>
         </AppBridgeProvider>
       </PolarisProvider>
     </BrowserRouter>

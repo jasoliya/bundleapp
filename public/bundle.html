@@ -7,7 +7,19 @@
         <ul>
             {% for key_value in bundles_meta['bundles'] %}
                 <li>
-                    <strong>{{ key_value[0] }}: </strong><span>{{ key_value[1] }}</span>
+                    <strong>{{ key_value[0] }}: </strong>
+                    {% assign products_arr = key_value[1]['products'] | split: '||' %}
+                    <ul>
+                        {% for product_str in products_arr %}
+                            <li>
+                                {% assign product_handle = product_str | split: '=' | last %}
+                                {% assign product = all_products[product_handle] %}
+                                {{ product.title }}<br>
+                                {{ product.price | money }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    
                 </li>
             {% endfor %}
         </ul>

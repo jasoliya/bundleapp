@@ -8,6 +8,7 @@
             {% for key_value in bundles_meta['bundles'] %}
                 <li>
                     <strong>{{ key_value[0] }}: </strong>
+                    {{ key_value[1]['products'] }}
                     {% assign products_arr = key_value[1]['products'] | split: '||' %}
                     <ul>
                         {% for product_str in products_arr %}

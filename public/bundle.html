@@ -5,8 +5,7 @@
         {% assign bundles_meta = app.metafields.cdapp_bundle.bundles.value %}
         <p class="cdapp-bundle-text">Content of your bundle page shown here:</p>
         <ul>
-            <li>{{ bundles_meta.bundles }}</li>
-            {% for key_value in bundles_meta %}
+            {% for key_value in bundles_meta['bundles'] %}
                 <li>
                     <strong>{{ key_value[0] }}: </strong><span>{{ key_value[1] }}</span>
                 </li>

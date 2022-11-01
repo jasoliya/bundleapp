@@ -2,7 +2,14 @@
 <div class="cdapp-bundle-page">
     <div class="cdapp-bundle-container">
         <h1 class="cdapp-bundle-heading">Bundle page</h1>
-        {% assign bundles_meta = app.metafields.cdapp_bundle.bundles %}
-        <p class="cdapp-bundle-text">Content of your bundle page shown here {{ bundles_meta }}</p>
+        {% assign bundles_meta = app.metafields.cdapp_bundle['bundles'] %}
+        <p class="cdapp-bundle-text">Content of your bundle page shown here:</p>
+        <ul>
+            {% for key_value in bundles_meta %}
+                <li>
+                    <strong>{{ key_value[0] }}: </strong><span>{{ key_value[1] }}</span>
+                </li>
+            {% endfor %}
+        </ul>
     </div>    
 </div>

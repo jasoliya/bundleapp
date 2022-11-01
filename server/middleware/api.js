@@ -115,7 +115,7 @@ export default function apiEndPoints(app) {
                                 type: "json",
                                 namespace: "cdapp_bundle",
                                 key: "bundles",
-                                value: meta
+                                value: JSON.stringify(meta)
                             }
                         ]
                     }

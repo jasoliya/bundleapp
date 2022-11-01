@@ -2,6 +2,7 @@
 <div class="cdapp-bundle-page">
     <div class="cdapp-bundle-container">
         <h1 class="cdapp-bundle-heading">Bundle page</h1>
-        <p class="cdapp-bundle-text">Content of your bundle page shown here {{ app.metafields.cdapp_bundle.bundles }}</p>
+        {% assign bundles_meta = app.metafields.cdapp_bundle.bundles %}
+        <p class="cdapp-bundle-text">Content of your bundle page shown here {{ bundles_meta.bundles }}</p>
     </div>    
 </div>

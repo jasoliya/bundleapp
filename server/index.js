@@ -90,11 +90,12 @@ export async function createAppServer(
     app.get('/bundle', async (req, res) => {
         res
             .status(200)
-            .set('Content-Type',isProd ? 'application/liquid' : 'text/html')            
+            .set('Content-Type',isProd ? 'application/liquid' : 'text/html')
             .send(fs.readFileSync(`${process.cwd()}/public/bundle.html`));
     });
 
     let vite;
+    
     if(isProd) {
         const compression = await import('compression').then(
             ({default: fn}) => fn

@@ -34,7 +34,6 @@ export default function apiEndPoints(app) {
                     }
                 }
             });
-            
             const parsedMeta = JSON.parse(metaValue);
             const bundle = parsedMeta.bundles[id];
             if(bundle === undefined) return res.status(401).send({error: "Couldn't find bundle"});
@@ -60,7 +59,7 @@ export default function apiEndPoints(app) {
                     }
                 }
             })
-
+            console.log(metaProducts);
             res.status(200).send({success: metaProducts});
         } catch(error) {
             res.status(500).send({error: error.message});

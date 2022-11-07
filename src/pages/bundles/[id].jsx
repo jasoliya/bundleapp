@@ -1,13 +1,14 @@
 import { Loading, TitleBar } from "@shopify/app-bridge-react";
-import { Card, Layout, Page, SkeletonBodyText, SkeletonDisplayText, Stack, Thumbnail } from "@shopify/polaris";
+import { Card, Frame, Layout, Page, SkeletonBodyText, Stack, Thumbnail } from "@shopify/polaris";
 import { useParams } from "react-router-dom";
 import { ImageMajor } from "@shopify/polaris-icons";
 import { useAppQuery } from "../../hooks";
+import { BundleForm } from "../../components";
 
 export default function edit() {
     const { id } = useParams();
     const {
-        data: bundle,
+        data: Bundle,
         isLoading,
         isRefetching
     } = useAppQuery({
@@ -15,7 +16,7 @@ export default function edit() {
         reactQueryOptions: {
             refetchOnReconnect: false
         }
-    })
+    });
 
     if(isLoading || isRefetching) {
         return (
@@ -25,33 +26,35 @@ export default function edit() {
                     breadcrumbs={[{ content: 'Home', url: '/' }]}
                 />
                 <Loading />
-                <Layout>
-                    <Layout.Section>
-                        <Card sectioned title="Title">
-                            <SkeletonBodyText lines={2} />
-                        </Card>
-                        <Card sectioned title="Products">
-                            <Stack spacing="loose" vertical>
-                                <Stack vertical={false} alignment="center" key="1">
-                                    <Stack.Item>
-                                        <Thumbnail source={ImageMajor} />
-                                    </Stack.Item>
-                                    <Stack.Item fill>
-                                        <SkeletonBodyText lines={1} />
-                                    </Stack.Item>
+                <Frame>
+                    <Layout>
+                        <Layout.Section>
+                            <Card sectioned title="Title">
+                                <SkeletonBodyText lines={2} />
+                            </Card>
+                            <Card sectioned title="Products">
+                                <Stack spacing="loose" vertical>
+                                    <Stack vertical={false} alignment="center" key="1">
+                                        <Stack.Item>
+                                            <Thumbnail source={ImageMajor} />
+                                        </Stack.Item>
+                                        <Stack.Item fill>
+                                            <SkeletonBodyText lines={1} />
+                                        </Stack.Item>
+                                    </Stack>
+                                    <Stack vertical={false} alignment="center" key="2">
+                                        <Stack.Item>
+                                            <Thumbnail source={ImageMajor} />
+                                        </Stack.Item>
+                                        <Stack.Item fill>
+                                            <SkeletonBodyText lines={1} />
+                                        </Stack.Item>
+                                    </Stack>
                                 </Stack>
-                                <Stack vertical={false} alignment="center" key="2">
-                                    <Stack.Item>
-                                        <Thumbnail source={ImageMajor} />
-                                    </Stack.Item>
-                                    <Stack.Item fill>
-                                        <SkeletonBodyText lines={1} />
-                                    </Stack.Item>
-                                </Stack>
-                            </Stack>
-                        </Card>
-                    </Layout.Section>
-                </Layout>
+                            </Card>
+                        </Layout.Section>
+                    </Layout>
+                </Frame>
             </Page>
         )
     }
@@ -62,7 +65,7 @@ export default function edit() {
                 title="Bundle"
                 breadcrumbs={[{ content: 'Home', url: '/' }]}
             />
-            
+            <BundleForm Bundle={Bundle} />
         </Page>
     )
 }

@@ -49,6 +49,16 @@ export const GET_PRODUCTS = `
                     id
                     handle
                     title
+                    images(first:1) {
+                    	edges {
+                            node {
+                                url(transform:{
+                                    maxWidth:100
+                                    maxHeight:100
+                                })
+                            }
+                        }	
+                  	}
                 }
             }
         }

@@ -1,5 +1,5 @@
 import { Shopify } from "@shopify/shopify-api";
-import { APP_INSTALLATION, APP_META, GET_PRODUCTS, SET_METAFIELD } from "./api-query.js";
+import { APP_INSTALLATION, APP_META, APP_META_GROUP, GET_PRODUCTS, REMOVE_META, SET_METAFIELD } from "./api-query.js";
 
 export function serialize(obj) {
     let str = [];
@@ -26,9 +26,28 @@ export async function getBundles(client) {
         body: {
             data: {
                 currentAppInstallation: {
-                    metafield: {
-                        value: metaValue
-                    }
+                    metafields
+                }
+            }
+        }
+    } = await client.query({
+        data: {
+            query: APP_META_GROUP,
+            variables: {
+                namespace: 'cdapp_bundles'
+            }
+        }
+    });
+
+    return metafields;
+}
+
+export async function getBundle(client, bundleId) {
+    const {
+        body: {
+            data: {
+                currentAppInstallation: {
+                    metafield
                 }
             }
         }
@@ -36,16 +55,16 @@ export async function getBundles(client) {
         data: {
             query: APP_META,
             variables: {
-                namespace: 'cdapp_bundle',
-                key: 'bundles'
+                namespace: 'cdapp_bundles',
+                key: `bundle_${bundleId}`
             }
         }
     });
 
-    return JSON.parse(metaValue);
+    return metafield;
 }
 
-export async function setBundles(client, meta) {
+export async function setBundle(client, bundleId, bundle) {
     const {
         body: {
             data: {
@@ -76,9 +95,9 @@ export async function setBundles(client, meta) {
                     {
                         ownerId: appInstallationId,
                         type: "json",
-                        namespace: "cdapp_bundle",
-                        key: "bundles",
-                        value: JSON.stringify(meta)
+                        namespace: "cdapp_bundles",
+                        key: `bundle_${bundleId}`,
+                        value: JSON.stringify(bundle)
                     }
                 ]
             }
@@ -113,4 +132,31 @@ export async function getBundleProducts(client, bundle) {
     });
 
     return metaProducts;
+}
+
+export async function removeBundle(client, bundleId) {
+    const bundleMeta = await getBundle(client, bundleId);
+
+    if(!bundleMeta) return undefined;
+    
+    const {
+        body: {
+            data: {
+                metafieldDelete: {
+                    deletedId
+                }
+            }
+        }
+    } = await client.query({
+        data: {
+            query: REMOVE_META,
+            variables: {
+                input: {
+                    id: bundleMeta.id
+                }
+            }
+        }
+    });
+
+    return deletedId;
 }

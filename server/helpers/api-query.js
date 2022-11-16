@@ -35,11 +35,28 @@ export const APP_META = `
     query getAppMeta($key: String!, $namespace: String!) {
         currentAppInstallation {
             metafield(key: $key, namespace: $namespace) {
+                id
                 value
             }
         }
     }
 `
+
+export const APP_META_GROUP = `
+    query getAppMetaGroup($namespace:String){
+        currentAppInstallation {
+            metafields(first:100,namespace:$namespace) {
+                edges {
+                    node {
+                        id
+                        key
+                        value
+                    }
+                }
+            }
+        }
+    }
+`;
 
 export const GET_PRODUCTS = `
     query getMetaProduct($first: Int, $query: String) {
@@ -61,6 +78,14 @@ export const GET_PRODUCTS = `
                   	}
                 }
             }
+        }
+    }
+`
+
+export const REMOVE_META = `
+    mutation deleteMeta($input: MetafieldDeleteInput!) {
+        metafieldDelete(input: $input) {
+            deletedId
         }
     }
 `

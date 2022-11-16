@@ -1,15 +1,15 @@
 import { TitleBar } from "@shopify/app-bridge-react";
-import { Page } from "@shopify/polaris";
+import { Frame } from "@shopify/polaris";
 import { BundleForm } from "../../components";
 
 export default function create() {
     return (
-        <Page>
+        <Frame>
             <TitleBar 
                 title="Create bundle"
                 breadcrumbs={[{content: 'Home', url: '/'}]}
             />
             <BundleForm/>
-        </Page>
+        </Frame>
     );
 }

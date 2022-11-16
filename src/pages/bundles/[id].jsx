@@ -1,7 +1,6 @@
 import { Loading, TitleBar } from "@shopify/app-bridge-react";
-import { Card, Frame, Layout, Page, SkeletonBodyText, Stack, Thumbnail } from "@shopify/polaris";
+import { Card, Frame, Layout, Page, SkeletonBodyText, SkeletonDisplayText, Stack, Thumbnail } from "@shopify/polaris";
 import { useParams } from "react-router-dom";
-import { ImageMajor } from "@shopify/polaris-icons";
 import { useAppQuery } from "../../hooks";
 import { BundleForm } from "../../components";
 
@@ -26,46 +25,44 @@ export default function edit() {
                     breadcrumbs={[{ content: 'Home', url: '/' }]}
                 />
                 <Loading />
-                <Frame>
-                    <Layout>
-                        <Layout.Section>
-                            <Card sectioned title="Title">
-                                <SkeletonBodyText lines={2} />
-                            </Card>
-                            <Card sectioned title="Products">
-                                <Stack spacing="loose" vertical>
-                                    <Stack vertical={false} alignment="center" key="1">
-                                        <Stack.Item>
-                                            <Thumbnail source={ImageMajor} />
+                <Stack vertical spacing="loose">
+                    <SkeletonDisplayText size="medium" />
+                    <Frame>
+                        <Layout>
+                            <Layout.Section>
+                                <Card sectioned>
+                                    <SkeletonBodyText lines={2} />
+                                </Card>
+                                <Card sectioned>
+                                    <Stack spacing="loose" vertical>
+                                        <Stack.Item fill>
+                                            <SkeletonBodyText lines={2} />
                                         </Stack.Item>
                                         <Stack.Item fill>
-                                            <SkeletonBodyText lines={1} />
+                                            <SkeletonBodyText lines={2} />
                                         </Stack.Item>
                                     </Stack>
-                                    <Stack vertical={false} alignment="center" key="2">
-                                        <Stack.Item>
-                                            <Thumbnail source={ImageMajor} />
-                                        </Stack.Item>
-                                        <Stack.Item fill>
-                                            <SkeletonBodyText lines={1} />
-                                        </Stack.Item>
-                                    </Stack>
-                                </Stack>
-                            </Card>
-                        </Layout.Section>
-                    </Layout>
-                </Frame>
+                                </Card>
+                            </Layout.Section>
+                            <Layout.Section secondary>
+                                <Card sectioned>
+                                    <SkeletonBodyText lines={2} />
+                                </Card>
+                            </Layout.Section>
+                        </Layout>
+                    </Frame>
+                </Stack>
             </Page>
         )
     }
 
     return (
-        <Page>
+        <Frame>
             <TitleBar 
                 title="Bundle"
                 breadcrumbs={[{ content: 'Home', url: '/' }]}
             />
             <BundleForm Bundle={Bundle} />
-        </Page>
+        </Frame>
     )
 }

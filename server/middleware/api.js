@@ -1,7 +1,6 @@
 import { Shopify } from '@shopify/shopify-api';
 import verifyAppProxyExtensionSignature from './verify-app-proxy-extension-signature.js';
-import { GET_PRODUCTS } from '../helpers/api-query.js';
-import { getBundleProducts, getBundles, getSession, setBundles } from '../helpers/utilities.js';
+import { getBundleProducts, getBundle, getSession, setBundle, getBundles, removeBundle } from '../helpers/utilities.js';
 
 export default function apiEndPoints(app) {
     app.get('/api/bundles', async (req, res) => {
@@ -14,17 +13,17 @@ export default function apiEndPoints(app) {
         )
 
         try {
-            const appMeta = await getBundles(client);
-            let bundles = [], bundle, current_bundle;
-            for(var key in appMeta.bundles) {
-                bundle = {};
-                current_bundle = appMeta.bundles[key];
-                bundle['id'] = key;
-                bundle['title'] = current_bundle.title;
-                bundle['item_counts'] = current_bundle.products.split('||').length;
-                bundles.push(bundle);
-            }
-
+            const bundlesMeta = await getBundles(client);
+            let tmpBundle;
+            const bundles = bundlesMeta.edges.map(({ node: bundle }) => {
+                tmpBundle = JSON.parse(bundle.value);
+                return {
+                    id: bundle.key.replace('bundle_',''),
+                    title: tmpBundle.title,
+                    status: tmpBundle.status,
+                    item_counts: tmpBundle.products.split('||').length
+                }
+            });
             res.status(200).send(bundles);
         } catch(error) {
             res.status(500).send({error: error.message});
@@ -42,15 +41,16 @@ export default function apiEndPoints(app) {
         )
         
         try {
-            const appMeta = await getBundles(client);
-            const bundle = appMeta['bundles'][id];
-            if(!bundle) return res.status(401).send({error: "Couldn't find bundle"});
+            const bundleMeta = await getBundle(client, id);
+            if(!bundleMeta) return res.status(401).send({error: "Couldn't find bundle"});
 
+            const bundle = JSON.parse(bundleMeta.value);
             const metaProducts = await getBundleProducts(client, bundle);
             
             let result = {};
             result['id'] = id;
-            result['title'] = bundle.title
+            result['title'] = bundle.title;
+            result['status'] = bundle.status;
             result['products'] = metaProducts.edges.map((product) => {
                 return {
                     handle: product.node['handle'],
@@ -77,23 +77,21 @@ export default function apiEndPoints(app) {
         );
 
         try {
-            const appMeta = await getBundles(client);
-            let bundles = appMeta['bundles'];
-            if(typeof bundles[id] !== typeof undefined) delete bundles[id];
-            
-            await setBundles(client, appMeta);
+            const deletedId  = await removeBundle(client, id);
+            if(!deletedId) return res.status(401).send({error: "Couldn't find bundle"});
 
-            let result_bundles = [], bundle, current_bundle;
-            for(var key in appMeta.bundles) {
-                bundle = {};
-                current_bundle = appMeta.bundles[key];
-                bundle['id'] = key;
-                bundle['title'] = current_bundle.title;
-                bundle['item_counts'] = current_bundle.products.split('||').length;
-                result_bundles.push(bundle);
-            }
-
-            res.status(200).send(result_bundles);
+            const bundlesMeta = await getBundles(client);
+            let tmpBundle;
+            const bundles = bundlesMeta.edges.map(({ node: bundle }) => {
+                tmpBundle = JSON.parse(bundle.value);
+                return {
+                    id: bundle.key.replace('bundle_',''),
+                    title: tmpBundle.title,
+                    status: tmpBundle.status,
+                    item_counts: tmpBundle.products.split('||').length
+                }
+            });
+            res.status(200).send(bundles);
         } catch(error) {
             res.status(500).send({error: error.message});
         }
@@ -112,19 +110,20 @@ export default function apiEndPoints(app) {
         const data = req.body;
 
         try {
-            const appMeta = await getBundles(client);
-            let bundles = appMeta['bundles'];
-            if(!bundles[data.id]) bundles[data.id] = {};
-            bundles[data.id]['title'] = data.title;
-            bundles[data.id]['products'] = data.productsInput;
+            const bundle = {
+                title: data.title,
+                products: data.productsInput,
+                status: data.status
+            }
 
-            await setBundles(client, appMeta);
+            await setBundle(client, id, bundle);
 
-            const metaProducts = await getBundleProducts(client, bundles[data.id]);
+            const metaProducts = await getBundleProducts(client, bundle);
 
             let result = {};
             result['id'] = id;
             result['title'] = data.title;
+            result['status'] = data.status;
             result['products'] = metaProducts.edges.map((product) => {
                 return {
                     handle: product.node['handle'],
@@ -152,13 +151,12 @@ export default function apiEndPoints(app) {
         const data = req.body;
         
         try {
-            const appMeta = await getBundles(client);
-            let bundles = appMeta['bundles'];
-            bundles[data.id] = {};
-            bundles[data.id]['title'] = data.title;
-            bundles[data.id]['products'] = data.productsInput;
-
-            const metafield = await setBundles(client, appMeta);
+            let bundle = {
+                title: data.title,
+                products: data.productsInput,
+                status: data.status
+            }
+            const metafield = await setBundle(client, data.id, bundle);
             res.status(200).send(metafield);
         } catch(error) {
             res.status(500).send({error: error.message});

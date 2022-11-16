@@ -1,9 +1,24 @@
-import { Button, Card, EmptyState, Form, Frame, Icon, Layout, Link, Modal, Stack, Text, TextField, TextStyle, Thumbnail, Toast } from "@shopify/polaris";
+import { 
+    Badge,
+    Button,
+    Card,
+    EmptyState,
+    Icon,
+    Layout,
+    Modal,
+    Page,
+    Select,
+    Stack,
+    TextField,
+    TextStyle,
+    Thumbnail,
+    Toast
+} from "@shopify/polaris";
 import { ContextualSaveBar, ResourcePicker, useNavigate } from '@shopify/app-bridge-react';
 import { useCallback, useState } from "react";
 import { useForm, useField, notEmptyString } from '@shopify/react-form';
 import { imageURL } from '../helper';
-import { ImageMajor, AlertMinor } from '@shopify/polaris-icons';
+import { CancelSmallMinor, ImageMajor, AlertMinor } from '@shopify/polaris-icons';
 import { useAuthenticatedFetch } from '../hooks';
 
 const convertProductsToString = (products) => {
@@ -24,15 +39,6 @@ export function BundleForm({ Bundle: InitialBundle }) {
     const [selectedProducts, setSelectedProducts] = useState(bundle?.products || []);
     const [openModal, setOpenModal] = useState(false);
 
-    const toastMarkup = submitted ? (
-        <Toast 
-            content="Bundle updated" 
-            onDismiss={() => {
-                setSubmitted(false);
-            }}
-        />
-    ) : null;
-
     const onSubmit = useCallback(
         (body) => {
             (async () => {
@@ -49,25 +55,26 @@ export function BundleForm({ Bundle: InitialBundle }) {
                 });
                 if(response.ok) {
                     makeClean();
-                    const bundle = await response.json();
+                    const result = await response.json();
+                    setSubmitted(true);
+                    setSubmitting(false);
                     if(!BundleId) {
                         navigate(`/bundles/${uid}`);
                     } else {
-                        setBundle(bundle);
-                        setSubmitted(true);
-                        setSubmitting(false);
+                        setBundle(result);
                     }
                 }
             })();
             return { status: "success" };
         }, 
         [bundle, setBundle]
-    )
+    );
 
     const {
         fields: {
             title,
-            productsInput
+            productsInput,
+            status
         },
         submit,
         dirty,
@@ -83,10 +90,20 @@ export function BundleForm({ Bundle: InitialBundle }) {
             productsInput: useField({
                 value: bundle?.products ? convertProductsToString(bundle.products) : "",
                 validates: [notEmptyString('Please select a products')]
-            })
+            }),
+            status: useField(bundle?.status || 'active')
         },
         onSubmit
     });
+
+    const toastMarkup = submitted ? (
+        <Toast 
+            content="Bundle updated" 
+            onDismiss={() => {
+                setSubmitted(false);
+            }}
+        />
+    ) : null;
 
     const toggleProductPicker = useCallback(
         () => setShowProductPicker(!showProductPicker),
@@ -156,140 +173,152 @@ export function BundleForm({ Bundle: InitialBundle }) {
             setOpenModal(false);
             navigate('/');
         }
-    }, [bundle])
+    }, [bundle]);
+
+    const statusMarkup = bundle?.status ? (
+        <Badge status={bundle.status == 'active' ? 'success' : 'info'}>{bundle.status === 'active' ? 'Active' : 'Draft'}</Badge>
+    ) : null;
 
     return (
-        <Frame>
+        <Page
+            breadcrumbs={[{ content: 'bundles', url: '/' }]}
+            title={bundle?.title ? bundle.title : 'New bundle'}
+            titleMetadata={statusMarkup}
+        >
             <Layout>
-                <Layout.Section>
-                    <Form onSubmit={submit}>
-                        <ContextualSaveBar 
-                            saveAction={{
-                                label: "Save",
-                                onAction: submit,
-                                loading: submitting,
-                                disabled: submitting
-                            }}
-                            discardAction={{
-                                label: "Discard",
-                                onAction: () => {
-                                    reset();
-                                    handleFormReset();
-                                },
-                                loading: submitting,
-                                disabled: submitting
-                            }}
-                            visible={dirty}
-                            fullWidth={true}
+                <Layout.Section>    
+                    <ContextualSaveBar 
+                        saveAction={{
+                            label: "Save",
+                            onAction: submit,
+                            loading: submitting,
+                            disabled: submitting
+                        }}
+                        discardAction={{
+                            label: "Discard",
+                            onAction: () => {
+                                reset();
+                                handleFormReset();
+                            },
+                            loading: submitting,
+                            disabled: submitting
+                        }}
+                        visible={dirty}
+                        fullWidth={true}
+                    />
+                    <Card sectioned title="Title">
+                        <TextField 
+                            {...title}
+                            label="Title"
+                            labelHidden
+                            helpText="Only store member can see this"
                         />
-                        <Card sectioned title="Title">
-                            <TextField 
-                                {...title}
-                                label="Title"
-                                labelHidden
-                                helpText="Only store member can see this"
-                            />
-                        </Card>
-                        <Card
-                            title="Products"
-                            actions={[
-                                {
-                                    content: productsInput.value ? "Change product" : "Select product",
-                                    onAction: toggleProductPicker
-                                }
-                            ]}
-                        >
+                    </Card>
+                    <Card
+                        title="Products"
+                        actions={[
+                            {
+                                content: productsInput.value ? "Change product" : "Select product",
+                                onAction: toggleProductPicker
+                            }
+                        ]}
+                    >
+                        <ResourcePicker
+                            open={showProductPicker}
+                            resourceType="Product"
+                            showVariants={false}
+                            onCancel={toggleProductPicker}
+                            onSelection={handleSelection}
+                            initialSelectionIds={initialProductsIds}
+                        />
+                        {productsInput.value ? (
+                            <div className="rowList">
+                                {selectedProducts.map((product, index) => (
+                                    <div className="rowItem" key={product.id}>
+                                        <Stack vertical={false} alignment="center" spacing="baseTight"> 
+                                            <Stack.Item>
+                                                <span className="indexNo">{index + 1}.</span>
+                                            </Stack.Item>
+                                            <Stack.Item>
+                                                <Thumbnail
+                                                    source={product?.image ?? ImageMajor}
+                                                    alt={product.title}
+                                                    size="small"
+                                                />                                                        
+                                            </Stack.Item>
+                                            <Stack.Item fill>
+                                                <TextStyle>{product.title}</TextStyle>
+                                            </Stack.Item>
+                                            <Stack.Item>
+                                                <Button icon={CancelSmallMinor} plain onClick={() => handleRemove(product.handle)} />
+                                            </Stack.Item>
+                                        </Stack>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
                             <Card.Section>
-                                <ResourcePicker
-                                    open={showProductPicker}
-                                    resourceType="Product"
-                                    showVariants={false}
-                                    onCancel={toggleProductPicker}
-                                    onSelection={handleSelection}
-                                    initialSelectionIds={initialProductsIds}
-                                />
-                                {productsInput.value ? (
-                                    <Stack spacing="loose" vertical>
-                                        {selectedProducts.map((product) => (
-                                            <Stack vertical={false} alignment="center" key={product.id}> 
-                                                <Stack.Item>
-                                                    {product.image ? (
-                                                        <Thumbnail
-                                                            source={product.image}
-                                                            alt={product.title}
-                                                        />
-                                                    ) : (
-                                                        <Thumbnail
-                                                            source={ImageMajor}
-                                                            alt={product.title}
-                                                        />
-                                                    )}
-                                                </Stack.Item>
-                                                <Stack.Item fill>
-                                                    <TextStyle variation="strong">{product.title}</TextStyle>
-                                                </Stack.Item>
-                                                <Stack.Item>
-                                                    <Link onClick={() => handleRemove(product.handle)}>
-                                                        <Text color="warning">Remove</Text>
-                                                    </Link>
-                                                </Stack.Item>
-                                            </Stack>
-                                        ))}
-                                    </Stack>
-                                ) : (
-                                    <Stack vertical spacing="extraTight">
-                                        <EmptyState>
-                                            <p>Your selected products will appear here</p>
-                                        </EmptyState>
-                                        {productsInput.error && (
-                                            <Stack spacing="tight">
-                                                <Icon source={AlertMinor} color="critical" />
-                                                <TextStyle variation="negative">{productsInput.error}</TextStyle>
-                                            </Stack>
-                                        )}
-                                    </Stack>
-                                ) } 
+                                <Stack vertical spacing="extraTight">
+                                    <EmptyState>
+                                        <p>Your selected products will appear here</p>
+                                    </EmptyState>
+                                    {productsInput.error && (
+                                        <Stack spacing="tight">
+                                            <Icon source={AlertMinor} color="critical" />
+                                            <TextStyle variation="negative">{productsInput.error}</TextStyle>
+                                        </Stack>
+                                    )}
+                                </Stack>
                             </Card.Section>
-                        </Card>
-                        {toastMarkup}
-                    </Form>
+                        )} 
+                    </Card>
                 </Layout.Section>
-                {bundle?.id && (
-                    <>
-                        <Modal
-                            open={openModal}
-                            onClose={() => setOpenModal(false)}
-                            title="Confirm deletion"
-                            primaryAction={{
-                                content: 'Delete',
-                                destructive: true,
-                                loading: deleting,
-                                disabled: deleting,
-                                onAction: handleDeleteBundle
-                            }}
-                            secondaryActions={[
-                                {
-                                    content: "Cancel",
-                                    disabled: deleting,
-                                    onAction: () => setOpenModal(false)
-                                }
+                <Layout.Section secondary>
+                    <Card sectioned title="Bundle status">
+                        <Select 
+                            options={[
+                                { label: 'Active', value: 'active' },
+                                { label: 'Draft', value: 'draft' }
                             ]}
-                        >
-                            <Modal.Section>
-                                <p>Are you sure you want to delete this bundle?</p>
-                            </Modal.Section>
-                        </Modal>
-                        <Layout.Section>
-                            <Button 
-                                destructive
-                                loading={deleting}
-                                disabled={deleting || submitting}
-                                onClick={() => setOpenModal(true)}
-                            >Delete bundle</Button>
-                        </Layout.Section>
-                    </>
+                            {...status}
+                        />
+                    </Card>
+                </Layout.Section>
+                {toastMarkup}
+                <Modal
+                    open={openModal}
+                    onClose={() => setOpenModal(false)}
+                    title="Confirm deletion"
+                    primaryAction={{
+                        content: 'Delete',
+                        destructive: true,
+                        loading: deleting,
+                        disabled: deleting,
+                        onAction: handleDeleteBundle
+                    }}
+                    secondaryActions={[
+                        {
+                            content: "Cancel",
+                            disabled: deleting,
+                            onAction: () => setOpenModal(false)
+                        }
+                    ]}
+                >
+                    <Modal.Section>
+                        <p>Are you sure you want to delete this bundle?</p>
+                    </Modal.Section>
+                </Modal>
+                {bundle?.id && (
+                    <Layout.Section>
+                        <Button 
+                            destructive
+                            loading={deleting}
+                            disabled={deleting || submitting}
+                            onClick={() => setOpenModal(true)}
+                        >Delete bundle</Button>
+                    </Layout.Section>
                 )}
             </Layout>
-        </Frame>
+        </Page>
     )
 }

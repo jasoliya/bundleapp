@@ -1,10 +1,9 @@
 import { 
     Card,
     EmptyState,
-    IndexTable,
+    Frame,
     Page,
-    SkeletonBodyText,
-    TextStyle
+    SkeletonBodyText
 } from '@shopify/polaris';
 import { Loading, TitleBar, useNavigate } from '@shopify/app-bridge-react';
 import emptyImage from '../assets/emptystate-files.png';
@@ -14,15 +13,21 @@ import { useState } from 'react';
 
 export default function HomePage() {
     const navigate = useNavigate();
-    const [ changedList, setChangedList ] = useState([]);
+    const [ bundles, setBundles ] = useState([]);
     
-    const {
-        data: bundles,
+    let {
+        data,
         isLoading,
-        isRefetching
+        isRefetching,
+        isSuccess
     } = useAppQuery({
-        url: '/api/bundles'
-    });
+        url: '/api/bundles',
+        reactQueryOptions: {
+            onSuccess: (data) => {
+                setBundles(data);
+            }
+        }
+    });     
 
     const primaryAction = {
         content: 'Create bundle',
@@ -30,14 +35,16 @@ export default function HomePage() {
     }
 
     const loadingMarkup = isLoading ? (
-        <Card sectioned>
-            <Loading />
-            <SkeletonBodyText />
-        </Card>
+        <Frame>
+            <Card sectioned>
+                <Loading />
+                <SkeletonBodyText />
+            </Card>
+        </Frame>
     ) : null;
     
     const emptyStateMarkup =
-        !isLoading && !bundles?.length ? (
+        isSuccess && !bundles?.length ? (
             <Card sectioned>
                 <EmptyState
                     heading='Create your bundle'
@@ -54,12 +61,12 @@ export default function HomePage() {
             </Card>
         ) : null;
 
-    const handleCallback = (_bundles) => {
-        setChangedList(_bundles);
+    const handleCallback = (data) => {
+        setBundles(data);
     }
     
     const bundlesMarkup = bundles?.length ? (
-        <BundleIndex bundleList={changedList.length ? changedList : bundles} loading={isRefetching} parentCallback={handleCallback}  />
+        <BundleIndex bundleList={bundles} loading={isRefetching} parentCallback={handleCallback}  />
     ) : null;
 
     return (

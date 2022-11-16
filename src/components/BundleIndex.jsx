@@ -1,5 +1,5 @@
 import { useNavigate } from "@shopify/app-bridge-react";
-import { Button, ButtonGroup, Card, Frame, IndexTable, Modal, TextStyle, Toast } from "@shopify/polaris";
+import { Badge, Button, ButtonGroup, Card, Frame, IndexTable, Modal, TextStyle, Toast, Tooltip } from "@shopify/polaris";
 import { useCallback } from "react";
 import { useState } from "react";
 import { useAuthenticatedFetch } from "../hooks";
@@ -42,6 +42,7 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
         });
         if(response.ok) {
             const result_bundles = await response.json();
+            navigate('/');
             parentCallback(result_bundles);
         }
         setDeleting(false);
@@ -49,15 +50,22 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
         setDeleted(true);
     }, [deleteId, setDeleteId, openModal, setOpenModal, deleting, setDeleting])
 
-    const rowMarkup = bundles.map(({ id, title, item_counts }, index) => {
+    const rowMarkup = bundles.map(({ id, title, status, item_counts }, index) => {
         return (
             <IndexTable.Row
                 id={id}
                 key={id}
                 position={index}
             >
-                <IndexTable.Cell className="w-60">
+                <IndexTable.Cell className="w-40">
                     <TextStyle variation="strong">{title}</TextStyle>
+                </IndexTable.Cell>
+                <IndexTable.Cell className="w-20">
+                    {status ? (
+                        <Badge status={status == 'active' ? 'success' : 'info' }>{status == 'active' ? 'Active' : 'Draft'}</Badge>
+                    ) : (
+                        <>-</>
+                    )}
                 </IndexTable.Cell>
                 <IndexTable.Cell className="w-20">
                     <TextStyle variation="subdued">{item_counts}</TextStyle>
@@ -67,15 +75,19 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
                         <Button
                             onClick={() => navigate(`/bundles/${id}`)}
                             disabled={deleting}
+                            accessibilityLabel="Edit bundle"
                         >Edit</Button>
-                        <Button destructive disabled={deleting}
+                        <Button 
                             onClick={() => handleDelete(id)}
+                            disabled={deleting}
+                            destructive
+                            accessibilityLabel="Remove bundle"
                         >Delete</Button>
                     </ButtonGroup>
                 </IndexTable.Cell>
             </IndexTable.Row>
         )
-    })
+    });
 
     return (
         <Frame>
@@ -108,6 +120,7 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
                     itemCount={bundles.length}
                     headings={[
                         { title: 'Name' },
+                        { title: 'Status' },
                         { title: 'Items' },
                         { title: 'Action' },
                     ]}

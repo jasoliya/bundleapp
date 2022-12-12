@@ -1,5 +1,105 @@
 import { Shopify } from "@shopify/shopify-api";
-import { APP_INSTALLATION, APP_META, APP_META_GROUP, GET_PRODUCTS, REMOVE_META, SET_METAFIELD } from "./api-query.js";
+import { APP_INSTALLATION, APP_META, APP_META_GROUP, GET_IMAGE, GET_PRODUCTS, IMG_REMOVE, IMG_UPLOAD, REMOVE_META, SET_METAFIELD } from "./api-query.js";
+
+export const poll = async ({ fn, validate, interval, maxAttempts, errorMsg }) => {
+    let attempts = 0;
+
+    const executePoll = async (resolve, reject) => {
+        const result = await fn();
+        attempts++;
+
+        if (validate(result)) {
+            return resolve(result);
+        } else if (maxAttempts && attempts === maxAttempts) {
+            return reject(new Error(errorMsg));
+        } else {
+            setTimeout(executePoll, interval, resolve, reject);
+        }
+    };
+
+    return new Promise(executePoll);
+};
+
+export async function getUploadedImage(client, mediaId) {
+    return await poll({
+        fn: async () => {
+            const {
+                body: {
+                    data: {
+                        node: {
+                            image
+                        }
+                    }
+                }
+            } = await client.query({
+                data: {
+                    query: GET_IMAGE,
+                    variables: {
+                        id: mediaId
+                    }
+                }
+            });
+
+            return image;
+        },
+        validate: (image) => {
+            return image != null;
+        },
+        interval: 500,
+        maxAttempts: 10,
+        errorMsg: "Image could not be uploaded"
+    });
+}
+
+export async function uploadImage(client, altText, resourseUrl) {
+    const {
+        body: {
+            data: {
+                fileCreate: {
+                    files: [
+                        {
+                            id: mediaId
+                        }
+                    ]
+                }
+            }
+        }
+    } = await client.query({
+        data: {
+            query: IMG_UPLOAD,
+            variables: {
+                files: {
+                    alt: altText,
+                    contentType: 'IMAGE',
+                    originalSource: resourseUrl
+                }
+            }
+        }
+    });
+
+    return mediaId;
+}
+
+export async function removeImage(client, removeId) {
+    const {
+        body: {
+            data: {
+                fileDelete: {
+                    deletedFileIds
+                }
+            }
+        }
+    } = await client.query({
+        data: {
+            query: IMG_REMOVE,
+            variables: {
+                fileIds: [removeId]
+            }
+        }
+    });
+
+    return deletedFileIds;
+}
 
 export function serialize(obj) {
     let str = [];
@@ -138,6 +238,9 @@ export async function removeBundle(client, bundleId) {
     const bundleMeta = await getBundle(client, bundleId);
 
     if(!bundleMeta) return undefined;
+
+    const bundle = JSON.parse(bundleMeta.value);
+    if(bundle.image) removeImage(client, bundle.image.id);
     
     const {
         body: {

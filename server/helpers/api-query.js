@@ -1,7 +1,8 @@
 export const SHOP_QUERY = `
     query {
         shop {
-            name
+            name,
+            currencyCode
         }
     }
 `;
@@ -80,7 +81,7 @@ export const GET_PRODUCTS = `
             }
         }
     }
-`
+`;
 
 export const REMOVE_META = `
     mutation deleteMeta($input: MetafieldDeleteInput!) {
@@ -88,4 +89,59 @@ export const REMOVE_META = `
             deletedId
         }
     }
+`;
+
+export const STAGED_UPLOAD = `
+    mutation stagedUploadCreate($input: [StagedUploadInput!]!) {
+        stagedUploadsCreate(input: $input) {
+            stagedTargets {
+                resourceUrl
+                url
+                parameters {
+                    name,
+                    value
+                }
+            }
+        }
+    }
+`;
+
+export const IMG_UPLOAD = `
+    mutation fileCreate($files: [FileCreateInput!]!) {
+        fileCreate(files: $files) {
+            files {
+                ... on MediaImage {
+                    id
+                    image {
+                        id
+                    }
+                }
+            }
+            userErrors {
+                field
+                message
+            }
+        }
+    }
+`;
+
+export const IMG_REMOVE = `
+    mutation fileDelete($fileIds: [ID!]!) {
+        fileDelete(fileIds:$fileIds) {
+            deletedFileIds
+        }
+    }
 `
+
+export const GET_IMAGE = `
+    query getImage($id:ID!) {
+        node(id:$id) {
+            ... on MediaImage {
+                image {
+                    url
+                    altText
+                }
+            }
+        }
+    }
+`;

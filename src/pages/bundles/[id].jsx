@@ -1,5 +1,5 @@
-import { Loading, TitleBar } from "@shopify/app-bridge-react";
-import { Card, Frame, Layout, Page, SkeletonBodyText, SkeletonDisplayText, Stack, Thumbnail } from "@shopify/polaris";
+import { Loading } from "@shopify/app-bridge-react";
+import { Card, Layout, SkeletonBodyText, SkeletonPage } from "@shopify/polaris";
 import { useParams } from "react-router-dom";
 import { useAppQuery } from "../../hooks";
 import { BundleForm } from "../../components";
@@ -19,50 +19,37 @@ export default function edit() {
 
     if(isLoading || isRefetching) {
         return (
-            <Page>
-                <TitleBar 
-                    title="Bundle"
-                    breadcrumbs={[{ content: 'Home', url: '/' }]}
-                />
+            <SkeletonPage>
                 <Loading />
-                <Stack vertical spacing="loose">
-                    <SkeletonDisplayText size="medium" />
-                    <Frame>
-                        <Layout>
-                            <Layout.Section>
-                                <Card sectioned>
-                                    <SkeletonBodyText lines={2} />
-                                </Card>
-                                <Card sectioned>
-                                    <Stack spacing="loose" vertical>
-                                        <Stack.Item fill>
-                                            <SkeletonBodyText lines={2} />
-                                        </Stack.Item>
-                                        <Stack.Item fill>
-                                            <SkeletonBodyText lines={2} />
-                                        </Stack.Item>
-                                    </Stack>
-                                </Card>
-                            </Layout.Section>
-                            <Layout.Section secondary>
-                                <Card sectioned>
-                                    <SkeletonBodyText lines={2} />
-                                </Card>
-                            </Layout.Section>
-                        </Layout>
-                    </Frame>
-                </Stack>
-            </Page>
+                <Layout>
+                    <Layout.Section>
+                        <Card sectioned>
+                            <SkeletonBodyText lines={3} />
+                        </Card>
+                        <Card sectioned>
+                            <SkeletonBodyText lines={3} />
+                        </Card>
+                        <Card sectioned>
+                            <SkeletonBodyText lines={3} />
+                        </Card>
+                    </Layout.Section>
+                    <Layout.Section secondary>
+                        <Card sectioned>
+                            <SkeletonBodyText lines={2} />
+                        </Card>
+                        <Card sectioned>
+                            <SkeletonBodyText lines={2} />
+                        </Card>
+                        <Card sectioned>
+                            <SkeletonBodyText lines={2} />
+                        </Card>
+                    </Layout.Section>
+                </Layout>
+            </SkeletonPage>
         )
     }
 
     return (
-        <Frame>
-            <TitleBar 
-                title="Bundle"
-                breadcrumbs={[{ content: 'Home', url: '/' }]}
-            />
-            <BundleForm Bundle={Bundle} />
-        </Frame>
+        <BundleForm Bundle={Bundle} />
     )
 }

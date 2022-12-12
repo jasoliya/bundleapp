@@ -1,11 +1,11 @@
 import { 
     Card,
     EmptyState,
-    Frame,
     Page,
-    SkeletonBodyText
+    SkeletonBodyText,
+    SkeletonPage
 } from '@shopify/polaris';
-import { Loading, TitleBar, useNavigate } from '@shopify/app-bridge-react';
+import { Loading, useNavigate } from '@shopify/app-bridge-react';
 import emptyImage from '../assets/emptystate-files.png';
 import { useAppQuery } from '../hooks';
 import { BundleIndex } from '../components';
@@ -18,8 +18,7 @@ export default function HomePage() {
     let {
         data,
         isLoading,
-        isRefetching,
-        isSuccess
+        isRefetching
     } = useAppQuery({
         url: '/api/bundles',
         reactQueryOptions: {
@@ -29,38 +28,6 @@ export default function HomePage() {
         }
     });     
 
-    const primaryAction = {
-        content: 'Create bundle',
-        url: '/bundles/new'
-    }
-
-    const loadingMarkup = isLoading ? (
-        <Frame>
-            <Card sectioned>
-                <Loading />
-                <SkeletonBodyText />
-            </Card>
-        </Frame>
-    ) : null;
-    
-    const emptyStateMarkup =
-        isSuccess && !bundles?.length ? (
-            <Card sectioned>
-                <EmptyState
-                    heading='Create your bundle'
-                    action={{
-                        content: 'Create bundle',
-                        onAction: () => {
-                            navigate('/bundles/new')
-                        }
-                    }}
-                    image={emptyImage}
-                >
-                    <p>Create your bundle and offer best deals to customer</p>
-                </EmptyState>
-            </Card>
-        ) : null;
-
     const handleCallback = (data) => {
         setBundles(data);
     }
@@ -69,15 +36,48 @@ export default function HomePage() {
         <BundleIndex bundleList={bundles} loading={isRefetching} parentCallback={handleCallback}  />
     ) : null;
 
+    if(isLoading || isRefetching) {
+        return (
+            <SkeletonPage primaryAction>
+                <Card sectioned>
+                    <Loading />
+                    <SkeletonBodyText />
+                </Card>
+            </SkeletonPage>
+        );
+    }
+
+    if (!isLoading && !isRefetching && bundles.length === 0) {
+        return (
+            <Page>
+                <Card sectioned>
+                    <EmptyState
+                        heading='Create your bundle'
+                        action={{
+                            content: 'Create bundle',
+                            onAction: () => {
+                                navigate('/bundles/new')
+                            }
+                        }}
+                        image={emptyImage}
+                    >
+                        <p>Create your bundle and offer best deals to customer</p>
+                    </EmptyState>
+                </Card>
+            </Page>
+        );
+    }    
+
     return (
-        <Page>
-            <TitleBar 
-                title='Home'
-                primaryAction={primaryAction}
-            />
-            {loadingMarkup}
+        <Page
+            title='Bundles'
+            primaryAction={{
+                content: 'Create bundle',
+                disabled: bundles.length >= 10,
+                onAction: () => navigate('/bundles/new')
+            }}
+        >
             {bundlesMarkup}
-            {emptyStateMarkup}
         </Page>
     );
 }

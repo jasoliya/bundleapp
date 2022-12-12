@@ -1,5 +1,5 @@
-import { useNavigate } from "@shopify/app-bridge-react";
-import { Badge, Button, ButtonGroup, Card, Frame, IndexTable, Modal, TextStyle, Toast, Tooltip } from "@shopify/polaris";
+import { useNavigate, useToast } from "@shopify/app-bridge-react";
+import { Badge, Button, ButtonGroup, Card, IndexTable, Modal, TextStyle } from "@shopify/polaris";
 import { useCallback } from "react";
 import { useState } from "react";
 import { useAuthenticatedFetch } from "../hooks";
@@ -7,10 +7,10 @@ import { useAuthenticatedFetch } from "../hooks";
 export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
     const navigate = useNavigate();
     const fetch = useAuthenticatedFetch();
+    const {show} = useToast();
     const [ openModal, setOpenModal ] = useState(false);
     const [ deleteId, setDeleteId ] = useState();
     const [ deleting, setDeleting ] = useState(false);
-    const [ deleted, setDeleted ] = useState(false);
 
     const resourceName = {
         singular: 'bundle',
@@ -18,15 +18,6 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
     };
 
     const toggleModal = useCallback(() => setOpenModal(!openModal), [openModal]);
-
-    const toastMarkup = deleted ? (
-        <Toast 
-            content="Bundle removed"
-            onDismiss={() => {
-                setDeleted(false);
-            }}
-        />
-    ) : null;
 
     const handleDelete = (id) => {
         setDeleteId(id);
@@ -47,7 +38,7 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
         }
         setDeleting(false);
         setOpenModal(false);
-        setDeleted(true);
+        show('Bundle removed', { duration: 3000 });
     }, [deleteId, setDeleteId, openModal, setOpenModal, deleting, setDeleting])
 
     const rowMarkup = bundles.map(({ id, title, status, item_counts }, index) => {
@@ -75,11 +66,13 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
                         <Button
                             onClick={() => navigate(`/bundles/${id}`)}
                             disabled={deleting}
+                            size="slim"
                             accessibilityLabel="Edit bundle"
                         >Edit</Button>
                         <Button 
                             onClick={() => handleDelete(id)}
                             disabled={deleting}
+                            size="slim"
                             destructive
                             accessibilityLabel="Remove bundle"
                         >Delete</Button>
@@ -90,47 +83,44 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
     });
 
     return (
-        <Frame>
-            <Card sectioned title="Bundles">
-                <Modal
-                    open={openModal}
-                    onClose={toggleModal}
-                    title="Confirm deletion"
-                    primaryAction={{
-                        content: 'Delete',
-                        destructive: true,
-                        onAction: handleBundleRemove,
-                        loading: deleting,
+        <Card>
+            <Modal
+                open={openModal}
+                onClose={toggleModal}
+                title="Confirm deletion"
+                primaryAction={{
+                    content: 'Delete',
+                    destructive: true,
+                    onAction: handleBundleRemove,
+                    loading: deleting,
+                    disabled: deleting
+                }}
+                secondaryActions={[
+                    {
+                        content: "Cancel",
+                        onAction: toggleModal,
                         disabled: deleting
-                    }}
-                    secondaryActions={[
-                        {
-                            content: "Cancel",
-                            onAction: toggleModal,
-                            disabled: deleting
-                        }
-                    ]}
-                >
-                    <Modal.Section>
-                        <p>Are you sure you want to delete this bundle?</p>
-                    </Modal.Section>
-                </Modal>
-                <IndexTable
-                    resourceName={resourceName}
-                    itemCount={bundles.length}
-                    headings={[
-                        { title: 'Name' },
-                        { title: 'Status' },
-                        { title: 'Items' },
-                        { title: 'Action' },
-                    ]}
-                    selectable={false}
-                    loading={loading}
-                >
-                    {rowMarkup}
-                </IndexTable>
-            </Card>
-            {toastMarkup}
-        </Frame>
+                    }
+                ]}
+            >
+                <Modal.Section>
+                    <p>Are you sure you want to delete this bundle?</p>
+                </Modal.Section>
+            </Modal>
+            <IndexTable
+                resourceName={resourceName}
+                itemCount={bundles.length}
+                headings={[
+                    { title: 'Name' },
+                    { title: 'Status' },
+                    { title: 'Items' },
+                    { title: 'Action' },
+                ]}
+                selectable={false}
+                loading={loading}
+            >
+                {rowMarkup}
+            </IndexTable>
+        </Card>
     );
 }

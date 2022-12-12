@@ -26,7 +26,8 @@ export function AppBridgeProvider({children}) {
 
     const appConfig = {
         apiKey: API_KEY,
-        host: host
+        host: host,
+        forceRedirect: true
     }
 
     return (

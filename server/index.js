@@ -5,9 +5,11 @@ import cookieParser from 'cookie-parser';
 import { Shopify, LATEST_API_VERSION } from '@shopify/shopify-api';
 import applyAuthMiddleware from './middleware/auth.js';
 import verifyRequest from './middleware/verify-request.js';
+import { setupGDPRWebHooks } from './gdpr.js';
 import { AppInstallation } from './app_installations.js';
 import redirectToAuth from './helpers/redirect-to-auth.js';
 import apiEndPoints from './middleware/api.js';
+import verifyAppProxyExtensionSignature from './middleware/verify-app-proxy-extension-signature.js';
 
 dotenv.config();
 
@@ -27,12 +29,14 @@ Shopify.Context.initialize({
 });
 
 Shopify.Webhooks.Registry.addHandler('APP_UNINSTALLED', {
-    path: '/webhooks',
+    path: '/api/webhooks',
     webhookHandler: async (_topic, shop, _body) => {
         console.log('App uninstalled');
         await AppInstallation.delete(shop);
     }
-})
+});
+
+setupGDPRWebHooks('/api/webhooks');
 
 export async function createAppServer(
     root = process.cwd(),
@@ -40,15 +44,19 @@ export async function createAppServer(
 ) {
     const app = express();
     
+    app.set("use-online-tokens", false);
     app.use(cookieParser(Shopify.Context.API_SECRET_KEY));
 
     applyAuthMiddleware(app);
 
-    app.post('/webhooks', async (req, res) => {
+    app.post('/api/webhooks', async (req, res) => {
         try {
             await Shopify.Webhooks.Registry.process(req, res);
         } catch (e) {
             console.log(`Failed to process webhook ${e.message}`);
+            if(!res.headersSent) {
+                res.status(500).send(e.message);
+            }
         }
     });
 
@@ -87,7 +95,7 @@ export async function createAppServer(
 
     const fs = await import('fs');
 
-    app.get('/bundle', async (req, res) => {
+    app.get('/bundle/:id', verifyAppProxyExtensionSignature, async (req, res) => {
         res
             .status(200)
             .set('Content-Type', isProd ? 'application/liquid' : 'text/html')
@@ -100,11 +108,11 @@ export async function createAppServer(
         const compression = await import('compression').then(
             ({default: fn}) => fn
         );
-        const serverStatic = await import('serve-static').then(
+        const serveStatic = await import('serve-static').then(
             ({default: fn}) => fn
         );
         app.use(compression());
-        app.use(serverStatic(PROD_INDEX_PATH));
+        app.use(serveStatic(PROD_INDEX_PATH));
         app.use('/*', (req, res, next) => {
             res
               .status(200)

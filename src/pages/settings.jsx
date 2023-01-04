@@ -1,6 +1,6 @@
 import { Card, Layout, Page, SkeletonBodyText, SkeletonDisplayText, TextContainer } from "@shopify/polaris";
-import { SettingsForm } from "../../components/SettingsForm";
-import { useAppQuery } from "../../hooks";
+import { SettingsForm } from "../components/SettingsForm";
+import { useAppQuery } from "../hooks";
 
 export default function settings() {
     const {
@@ -43,6 +43,25 @@ export default function settings() {
 
                     <Layout.AnnotatedSection
                         id="layout"
+                        title={<SkeletonDisplayText size="small" />}
+                        description={<SkeletonBodyText lines={2} />}
+                    >
+                        <Card sectioned>
+                            <TextContainer>
+                                <SkeletonDisplayText size="small" />
+                                <div>
+                                    <SkeletonBodyText lines={2} />
+                                </div>
+                                <SkeletonDisplayText size="small" />
+                                <div>
+                                    <SkeletonBodyText lines={2} />
+                                </div>
+                            </TextContainer>
+                        </Card>
+                    </Layout.AnnotatedSection>
+
+                    <Layout.AnnotatedSection
+                        id="content"
                         title={<SkeletonDisplayText size="small" />}
                         description={<SkeletonBodyText lines={2} />}
                     >

@@ -1,8 +1,8 @@
 import { 
     ActionList,
-    Badge,
     Button,
     Card,
+    Checkbox,
     DropZone,
     EmptyState,
     FormLayout,
@@ -20,11 +20,11 @@ import {
     TextStyle,
     Thumbnail
 } from "@shopify/polaris";
-import { ContextualSaveBar, Loading, ResourcePicker, useNavigate, useToast } from '@shopify/app-bridge-react';
+import { ContextualSaveBar, Loading, ResourcePicker, useAppBridge, useNavigate, useToast } from '@shopify/app-bridge-react';
 import { useCallback, useState } from "react";
 import { useForm, useField, notEmptyString, useDynamicList } from '@shopify/react-form';
 import { imageURL } from '../helper';
-import { CancelSmallMinor, NoteMinor, ImageMajor, AlertMinor, DeleteMinor } from '@shopify/polaris-icons';
+import { CancelSmallMinor, NoteMinor, ImageMajor, AlertMinor, DeleteMinor, ViewMinor } from '@shopify/polaris-icons';
 import { useAuthenticatedFetch } from '../hooks';
 import { TextEditor } from "./TextEditor";
 
@@ -38,6 +38,7 @@ const convertProductsToString = (products) => {
 export function BundleForm({ Bundle: InitialBundle }) {
     const fetch = useAuthenticatedFetch();
     const navigate = useNavigate();
+    const {hostOrigin} = useAppBridge();
     const {show} = useToast();
     const [submitting, setSubmitting] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -49,6 +50,7 @@ export function BundleForm({ Bundle: InitialBundle }) {
     const [uploading, setUploading] = useState(false);
     const [activeImgDialogue, setActiveImgDialogue] = useState(false);
     const [popoverImgActive, setPopoverImgActive] = useState(false);
+    const [minimumThreshold, setMinimumThreshold] = useState(Math.max((bundle?.minimum_threshold || 0), 0));
     const [savedTiers, setSavedTiers] = useState(bundle?.discount_tiers || [{
         discount_threshold: '',
         discount: ''
@@ -61,8 +63,8 @@ export function BundleForm({ Bundle: InitialBundle }) {
                 const BundleId = bundle?.id;
                 const url = BundleId ? `/api/bundles/${BundleId}` : `/api/bundles`;
                 const method = BundleId ? 'PATCH' : 'POST';
-                const uid = BundleId ?? parseInt(Date.now() + Math.random());
-                body['id'] = uid;
+                //const uid = BundleId ?? parseInt(Date.now() + Math.random());
+                body['id'] = body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-$/, '').replace(/^-/, '');
                 setSubmitting(true);
                 setSavedTiers(body.discount_tiers);
 
@@ -76,9 +78,8 @@ export function BundleForm({ Bundle: InitialBundle }) {
 
                 if (response.ok) {
                     const result = await response.json();
-
                     if (!BundleId) {
-                        navigate(`/bundles/${uid}`);
+                        navigate(`/bundles/${result.handle}`);
                         show('Bundle created', { duration: 3000 });
                     } else {
                         setBundle(result);
@@ -110,14 +111,14 @@ export function BundleForm({ Bundle: InitialBundle }) {
             title,
             description,
             productsInput,
-            status,
             discount_type,
             discount_trigger,
+            minimum_threshold,
             tmp_image,
             removed_image,
-            text_add_button,
-            text_grid_add_button,
-            text_grid_added_button            
+            show_variants,
+            discount_name,
+            extra_class         
         },
         dynamicLists: {
             discount_tiers
@@ -125,7 +126,6 @@ export function BundleForm({ Bundle: InitialBundle }) {
         submit,
         dirty,
         reset,
-        submitErrors,
         makeClean
     } = useForm({
         fields: {
@@ -138,33 +138,33 @@ export function BundleForm({ Bundle: InitialBundle }) {
                 value: bundle?.products ? convertProductsToString(bundle.products) : "",
                 validates: [notEmptyString('Please select a products')]
             }),
-            status: useField(bundle?.status || 'active'),
             discount_type: useField(bundle?.discount_type || 'percentage'),
             discount_trigger: useField(bundle?.discount_trigger || 'total_products'),
+            minimum_threshold: useField({
+                value: typeof bundle?.minimum_threshold === 'undefined' ? -1 : bundle.minimum_threshold,
+                validates: (value) => {
+                    if(value === '') return 'Please enter a value';
+                    if(isNaN(parseInt(value))) return 'Please enter a valid value';
+                }
+            }),
             tmp_image: useField(''),
             removed_image: useField(''),
-            text_add_button: useField({
-                value: bundle?.text_add_button || 'Add to cart',
-                validates: [notEmptyString('Please enter button text')]
+            show_variants: useField(bundle?.show_variants ?? true),
+            discount_name: useField({
+                value: bundle?.discount_name || 'Bundle discount',
+                validates: [notEmptyString('Please enter discount name')]
             }),
-            text_grid_add_button: useField({
-                value: bundle?.text_grid_add_button || 'Add',
-                validates: [notEmptyString('Please enter grid button text')]
-            }),
-            text_grid_added_button: useField({
-                value: bundle?.text_grid_added_button || 'Added',
-                validates: [notEmptyString('Please enter grid added text')]
-            })
+            extra_class: useField(bundle?.extra_class || '')
         },
         dynamicLists: {
             discount_tiers: useDynamicList({
                 list: savedTiers,
                 validates: {
                     discount_threshold: (discount_threshold) => {
-                        if(discount_threshold === '') return `${discount_trigger.value === 'total_price' ? 'Price' : 'Quantity'} is required`;
+                        if(discount_threshold === '') return `Please enter ${discount_trigger.value === 'total_price' ? 'price' : 'quantity'}`;
                     },
                     discount: (discount) => {
-                        if(discount === '') return 'Discount is required';
+                        if(discount === '' || discount < 0) return 'Please enter valid discount';
                     }
                 }
             }, emptyTierFactory),
@@ -237,7 +237,7 @@ export function BundleForm({ Bundle: InitialBundle }) {
 
         if(response.ok) {
             setOpenModal(false);
-            navigate('/');
+            navigate('/bundles');
             show('Bundle removed', { duration: 3000 });
         }
         setDeleting(false);
@@ -291,10 +291,6 @@ export function BundleForm({ Bundle: InitialBundle }) {
         setUploading(false);
     }, [bundle]);
 
-    const statusMarkup = bundle?.status ? (
-        <Badge status={bundle.status == 'active' ? 'success' : 'info'}>{bundle.status === 'active' ? 'Active' : 'Draft'}</Badge>
-    ) : null;
-
     const pagePrimaryAction = {
         content: "Save",
         onClick: submit,
@@ -319,9 +315,16 @@ export function BundleForm({ Bundle: InitialBundle }) {
 
     return (
         <Page
-            breadcrumbs={[{ content: 'bundles', url: '/' }]}
+            breadcrumbs={[{ content: 'bundles', url: '/bundles' }]}
             title={bundle?.title ? bundle.title : 'New bundle'}
-            titleMetadata={statusMarkup}
+            primaryAction={bundle?.id ?
+                <Button
+                    icon={ViewMinor}
+                    url={`${hostOrigin}/apps/ca/bundle/${bundle.id}`}
+                    external
+                >Preview</Button>
+                : null
+            }
         >
             {loadingMarkup}
             <Layout>
@@ -433,11 +436,43 @@ export function BundleForm({ Bundle: InitialBundle }) {
                                     label="Discount trigger"
                                     options={[
                                         { label: "Total number of products", value: "total_products" },
-                                        { label: "Quantity of single product", value: "total_same_products" },
-                                        { label: "Total bundle price", value: "total_price" }
+                                        { label: "Total price", value: "total_price" }
                                     ]}
                                     {...discount_trigger}
                                 />
+
+                                <Stack.Item fill={true}>
+                                    <Stack vertical spacing="extraTight">
+                                        <Checkbox 
+                                            label={`Set minimum ${discount_trigger.value === 'total_price' ? 'price' : 'quantity'} required for checkout`}
+                                            checked={minimum_threshold.value !== -1}
+                                            onChange={(value) => {
+                                                if(minimum_threshold.value === -1) {
+                                                    minimum_threshold.onChange(minimumThreshold)
+                                                } else {
+                                                    minimum_threshold.onChange(-1);
+                                                }
+                                            }}
+                                        />
+
+                                        {minimum_threshold.value !== -1 && (
+                                            <div className="max-wMdUp-17">
+                                                <TextField
+                                                    type="number"
+                                                    autoComplete="off"
+                                                    value={minimum_threshold.value}
+                                                    onChange={(value) => {
+                                                        let val = parseInt(value);
+                                                        val = isNaN(val) ? '' : val;
+                                                        minimum_threshold.onChange(val);
+                                                        setMinimumThreshold(Math.max(val, 0));
+                                                    }}
+                                                    error={minimum_threshold.error}
+                                                />
+                                            </div>
+                                        )}     
+                                    </Stack>                               
+                                </Stack.Item>
                             </Stack>
                         </Card.Section>
 
@@ -470,7 +505,7 @@ export function BundleForm({ Bundle: InitialBundle }) {
                                                                 label="Discount*"
                                                                 type="number"
                                                                 autoComplete="off"
-                                                                min={1}
+                                                                min={0}
                                                                 max={discount_type.value === 'percentage' ? 100 : null}
                                                                 suffix={discount_type.value === 'percentage' ? '%' : null}
                                                                 {...field.discount}
@@ -502,18 +537,19 @@ export function BundleForm({ Bundle: InitialBundle }) {
                             >Add tier</Button>
                         </Card.Section>
                     </Card>
+                    {bundle?.id && (
+                        <Card sectioned>
+                            <TextField
+                                label="Page URL"
+                                value={`${hostOrigin}/apps/ca/bundle/${bundle.id}`}
+                                disabled={true}
+                                connectedRight={<Button primary onClick={() => { navigator.clipboard.writeText(`${hostOrigin}/apps/ca/bundle/${bundle.id}`); show('Copied to clipboard', { duration: 3000 }); }}>Copy link</Button>}
+                            />                                                            
+                        </Card>
+                    )}
                 </Layout.Section>
 
                 <Layout.Section secondary>
-                    <Card sectioned title="Bundle status">
-                        <Select 
-                            options={[
-                                { label: 'Active', value: 'active' },
-                                { label: 'Draft', value: 'draft' }
-                            ]}
-                            {...status}
-                        />
-                    </Card>
                     <Card subdued sectioned>
                         <div className="space-bottom-5">
                             <Stack>
@@ -601,20 +637,22 @@ export function BundleForm({ Bundle: InitialBundle }) {
 
                     <Card sectioned subdued title="Additional settings">
                         <FormLayout>
-                            <TextField
-                                label="Button text*"
-                                autoComplete="off"
-                                {...text_add_button}
+                            <Checkbox
+                                label="Show variants"
+                                checked={show_variants.value}
+                                onChange={(value) => show_variants.onChange(value)}
                             />
-                            <TextField
-                                label="Grid button text*"
+                            <TextField 
+                                label="Discount name"
                                 autoComplete="off"
-                                {...text_grid_add_button}
+                                helpText="The discount name will be shown on the checkout page."
+                                {...discount_name}
                             />
-                            <TextField
-                                label="Grid added text*"
+                            <TextField 
+                                label="Additional class"
                                 autoComplete="off"
-                                {...text_grid_added_button}
+                                helpText="For developer use."
+                                {...extra_class}
                             />
                         </FormLayout>
                     </Card>

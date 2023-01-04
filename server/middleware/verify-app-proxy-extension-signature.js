@@ -20,7 +20,7 @@ function verifySignature(
 
     const digest = Buffer.from(sha_result, "utf-8");
     const checksum = Buffer.from(signature, "utf-8");
-
+    
     return(
         digest.length === checksum.length &&
         crypto.timingSafeEqual(digest, checksum)

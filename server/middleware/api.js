@@ -1,9 +1,39 @@
 import { Shopify } from '@shopify/shopify-api';
 import verifyAppProxyExtensionSignature from './verify-app-proxy-extension-signature.js';
 import { getBundleProducts, getBundle, getSession, setBundle, getBundles, removeBundle, getUploadedImage, uploadImage, removeImage } from '../helpers/utilities.js';
-import { APP_INSTALLATION, STAGED_UPLOAD, SET_METAFIELD, APP_META } from '../helpers/api-query.js';
+import { APP_INSTALLATION, STAGED_UPLOAD, SET_METAFIELD, APP_META, SHOP_QUERY } from '../helpers/api-query.js';
 
 export default function apiEndPoints(app) {
+    app.get('/api/dashboard', async (req, res) => {
+        const session = await getSession(req, res);
+        if(!session) return;
+
+        const client = new Shopify.Clients.Graphql(
+            session.shop,
+            session.accessToken
+        )
+
+        try {
+            const {
+                body: {
+                    data: {
+                        shop: {
+                            name
+                        }
+                    }
+                }
+            } = await client.query({
+                data: {
+                    query: SHOP_QUERY
+                }
+            })
+
+            res.status(200).send({shop_name: name});
+        } catch (error) {
+            res.status(500).send({error: error.message});
+        }
+    });
+
     app.get('/api/bundles', async (req, res) => {
         const session = await getSession(req, res);
         if(!session) return;
@@ -23,8 +53,8 @@ export default function apiEndPoints(app) {
                 return {
                     id: bundle.key.replace('bundle_',''),
                     title: tmpBundle.title,
-                    status: tmpBundle.status,
-                    item_counts: tmpBundle.products.split('||').length
+                    item_counts: tmpBundle.products.split('||').length,
+                    tiers: tmpBundle.discount_tiers.length
                 }
             });
             res.status(200).send(bundles);
@@ -53,13 +83,13 @@ export default function apiEndPoints(app) {
             let result = {};
             result['id'] = id;
             result['title'] = bundle.title;
-            result['status'] = bundle.status;
             result['discount_type'] = bundle.discount_type;
             result['discount_trigger'] = bundle.discount_trigger;
+            result['minimum_threshold'] = bundle.minimum_threshold;
             result['discount_tiers'] = bundle.discount_tiers;
-            result['text_add_button'] = bundle.text_add_button;
-            result['text_grid_add_button'] = bundle.text_grid_add_button;
-            result['text_grid_added_button'] = bundle.text_grid_added_button;
+            result['show_variants'] = bundle.show_variants;
+            result['discount_name'] = bundle.discount_name;
+            result['extra_class'] = bundle.extra_class;
             result['products'] = metaProducts.edges.map((product) => {
                 return {
                     handle: product.node['handle'],
@@ -68,7 +98,7 @@ export default function apiEndPoints(app) {
                     title: product.node['title']
                 }
             });
-            if(bundle.description) result['description'] = bundle.description
+            if(bundle.description) result['description'] = bundle.description;
             if(bundle.image) result['image'] = bundle.image;
             
             res.status(200).send({...result});
@@ -100,8 +130,8 @@ export default function apiEndPoints(app) {
                 return {
                     id: bundle.key.replace('bundle_',''),
                     title: tmpBundle.title,
-                    status: tmpBundle.status,
-                    item_counts: tmpBundle.products.split('||').length
+                    item_counts: tmpBundle.products.split('||').length,
+                    tiers: tmpBundle.discount_tiers.length
                 }
             });
             res.status(200).send(bundles);
@@ -126,13 +156,13 @@ export default function apiEndPoints(app) {
             const bundle = {
                 title: data.title,
                 products: data.productsInput,
-                status: data.status,
                 discount_type: data.discount_type,
                 discount_trigger: data.discount_trigger,
+                minimum_threshold: data.minimum_threshold,
                 discount_tiers: data.discount_tiers,
-                text_add_button: data.text_add_button,
-                text_grid_add_button: data.text_grid_add_button,
-                text_grid_added_button: data.text_grid_added_button                
+                show_variants: data.show_variants,
+                discount_name: data.discount_name,
+                extra_class: data.extra_class        
             }
 
             let keepCurrentImage = true;
@@ -169,13 +199,13 @@ export default function apiEndPoints(app) {
             let result = {};
             result['id'] = id;
             result['title'] = data.title;
-            result['status'] = data.status;
             result['discount_type'] = data.discount_type;
             result['discount_trigger'] = data.discount_trigger;
+            result['minimum_threshold'] = data.minimum_threshold;
             result['discount_tiers'] = data.discount_tiers;
-            result['text_add_button'] = bundle.text_add_button;
-            result['text_grid_add_button'] = bundle.text_grid_add_button;
-            result['text_grid_added_button'] = bundle.text_grid_added_button;
+            result['show_variants'] = data.show_variants;
+            result['discount_name'] = data.discount_name;
+            result['extra_class'] = data.extra_class;
             result['products'] = metaProducts.edges.map((product) => {
                 return {
                     handle: product.node['handle'],
@@ -208,13 +238,13 @@ export default function apiEndPoints(app) {
             let bundle = {
                 title: data.title,
                 products: data.productsInput,
-                status: data.status,
                 discount_type: data.discount_type,
                 discount_trigger: data.discount_trigger,
+                minimum_threshold: data.minimum_threshold,
                 discount_tiers: data.discount_tiers,
-                text_add_button: data.text_add_button,
-                text_grid_add_button: data.text_grid_add_button,
-                text_grid_added_button: data.text_grid_added_button
+                show_variants: data.show_variants,
+                discount_name: data.discount_name,
+                extra_class: data.extra_class
             }
 
             if(data.description) {
@@ -232,8 +262,23 @@ export default function apiEndPoints(app) {
                 }
             }
 
-            const metafield = await setBundle(client, data.id, bundle);
-            res.status(200).send(metafield);
+            const metafields = await getBundles(client);
+            const handles = metafields.edges.filter(({ node }) => {
+                return node.key.indexOf('bundle_') >= 0
+            }).map(({ node }) => {
+                return node.key.replace('bundle_','');
+            });
+        
+            var counter = data.id.match(/-?[0-9]$/gi);
+            counter = counter === null ? 0 : parseInt(counter[0].replace('-',''));
+            let handle = data.id;
+            while(handles.indexOf(handle) >= 0) {
+                counter++;
+                handle = data.id.replace(/-?[0-9]$/gi, '')+'-'+counter;
+            }
+
+            await setBundle(client, handle, bundle);
+            res.status(200).send({handle: handle});
         } catch(error) {
             res.status(500).send({error: error.message});
         }
@@ -300,15 +345,7 @@ export default function apiEndPoints(app) {
                 }
             });
 
-            const {
-                body: {
-                    data: {
-                        metafieldsSet: {
-                            metafields
-                        }
-                    }
-                }
-            } = await client.query({
+            await client.query({
                 data: {
                     query: SET_METAFIELD,
                     variables: {
@@ -325,7 +362,7 @@ export default function apiEndPoints(app) {
                 }
             });
 
-            res.status(200).send(appInstallationId);
+            res.status(200).send(data);
         } catch (error) {
             res.status(500).send({error: error.message});
         }
@@ -337,31 +374,21 @@ export default function apiEndPoints(app) {
         if(!req.body) return res.status(401).send({error: 'Required data missing'});
         const session = await Shopify.Utils.loadOfflineSession(shop);
         if(!session) return res.status(401).send({error: 'Could not find any session'});
-
+        
         try {
             const { Checkout } = await import(`@shopify/shopify-api/dist/rest-resources/${Shopify.Context.API_VERSION}/index.js`);           
             const checkout = new Checkout({ session: session });
-            let item = {}, req_data = req.body;
-            let line_items = [];
-
-            item['variant_id'] = req_data.variant_id;
-            item['quantity'] = req_data.quantity;
+            const data = req.body;
             
-            item['applied_discounts'] = [];
-            item['applied_discounts'].push({
-                amount: req_data.amount,
-                description: "Bundle discount",
-                application_type: "manual"
-            });
-            line_items.push(item);
+            checkout.line_items = data.line_items;
+            if(data.applied_discount) checkout.applied_discount = data.applied_discount;
             
-            checkout.line_items = line_items;
             await checkout.save({
                 update: true
             });
 
-            res.status(200).send({...checkout});
-        } catch(error) {
+            return res.status(200).send({...checkout});
+        } catch (error) {
             res.status(500).send({error: error.message});
         }        
     });

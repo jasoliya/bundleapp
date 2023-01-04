@@ -1,10 +1,11 @@
-import { Loading } from "@shopify/app-bridge-react";
+import { Loading, useNavigate } from "@shopify/app-bridge-react";
 import { Card, Layout, SkeletonBodyText, SkeletonPage } from "@shopify/polaris";
 import { useParams } from "react-router-dom";
 import { useAppQuery } from "../../hooks";
 import { BundleForm } from "../../components";
 
 export default function edit() {
+    const navigate = useNavigate();
     const { id } = useParams();
     const {
         data: Bundle,
@@ -17,9 +18,15 @@ export default function edit() {
         }
     });
 
+    if(!isLoading && !isRefetching) {
+        if(Bundle.error) {
+            navigate('/notFound');
+        }
+    }
+
     if(isLoading || isRefetching) {
         return (
-            <SkeletonPage>
+            <SkeletonPage primaryAction>
                 <Loading />
                 <Layout>
                     <Layout.Section>
@@ -34,9 +41,6 @@ export default function edit() {
                         </Card>
                     </Layout.Section>
                     <Layout.Section secondary>
-                        <Card sectioned>
-                            <SkeletonBodyText lines={2} />
-                        </Card>
                         <Card sectioned>
                             <SkeletonBodyText lines={2} />
                         </Card>

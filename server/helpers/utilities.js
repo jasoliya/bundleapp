@@ -225,7 +225,7 @@ export async function getBundleProducts(client, bundle) {
         data: {
             query: GET_PRODUCTS,
             variables: {
-                first: 10,
+                first: 24,
                 query: query_str
             }
         }

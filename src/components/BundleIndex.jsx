@@ -1,5 +1,6 @@
-import { useNavigate, useToast } from "@shopify/app-bridge-react";
-import { Badge, Button, ButtonGroup, Card, IndexTable, Modal, TextStyle } from "@shopify/polaris";
+import { useAppBridge, useNavigate, useToast } from "@shopify/app-bridge-react";
+import { Badge, Button, ButtonGroup, Card, IndexTable, Link, Modal, Text, Tooltip } from "@shopify/polaris";
+import { EditMinor, DeleteMinor, ViewMinor } from '@shopify/polaris-icons';
 import { useCallback } from "react";
 import { useState } from "react";
 import { useAuthenticatedFetch } from "../hooks";
@@ -8,6 +9,7 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
     const navigate = useNavigate();
     const fetch = useAuthenticatedFetch();
     const {show} = useToast();
+    const { hostOrigin } = useAppBridge();
     const [ openModal, setOpenModal ] = useState(false);
     const [ deleteId, setDeleteId ] = useState();
     const [ deleting, setDeleting ] = useState(false);
@@ -33,7 +35,7 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
         });
         if(response.ok) {
             const result_bundles = await response.json();
-            navigate('/');
+            navigate('/bundles');
             parentCallback(result_bundles);
         }
         setDeleting(false);
@@ -41,7 +43,7 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
         show('Bundle removed', { duration: 3000 });
     }, [deleteId, setDeleteId, openModal, setOpenModal, deleting, setDeleting])
 
-    const rowMarkup = bundles.map(({ id, title, status, item_counts }, index) => {
+    const rowMarkup = bundles.map(({ id, title, status, item_counts, tiers }, index) => {
         return (
             <IndexTable.Row
                 id={id}
@@ -49,33 +51,50 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
                 position={index}
             >
                 <IndexTable.Cell className="w-40">
-                    <TextStyle variation="strong">{title}</TextStyle>
+                    <Link 
+                        removeUnderline 
+                        monochrome
+                        onClick={(event) => {
+                            event.preventDefault();
+                            navigate(`/bundles/${id}`);
+                        }}
+                    >
+                        <Text variant="bodyMd" fontWeight="bold" as="span">{title.length > 28 ? title.substring(0, 28) + "..." : title}</Text>
+                    </Link>
                 </IndexTable.Cell>
                 <IndexTable.Cell className="w-20">
-                    {status ? (
-                        <Badge status={status == 'active' ? 'success' : 'info' }>{status == 'active' ? 'Active' : 'Draft'}</Badge>
-                    ) : (
-                        <>-</>
-                    )}
+                    <Text color="subdued" as="span">{item_counts}</Text>
                 </IndexTable.Cell>
                 <IndexTable.Cell className="w-20">
-                    <TextStyle variation="subdued">{item_counts}</TextStyle>
+                    <Text color="subdued" as="span">{tiers}</Text>
                 </IndexTable.Cell>
                 <IndexTable.Cell className="w-20">
                     <ButtonGroup segmented>
-                        <Button
-                            onClick={() => navigate(`/bundles/${id}`)}
-                            disabled={deleting}
-                            size="slim"
-                            accessibilityLabel="Edit bundle"
-                        >Edit</Button>
-                        <Button 
-                            onClick={() => handleDelete(id)}
-                            disabled={deleting}
-                            size="slim"
-                            destructive
-                            accessibilityLabel="Remove bundle"
-                        >Delete</Button>
+                        <Tooltip content="Edit" dismissOnMouseOut preferredPosition="above">
+                            <Button
+                                onClick={() => navigate(`/bundles/${id}`)}
+                                disabled={deleting}
+                                icon={EditMinor}
+                                accessibilityLabel="Edit bundle"
+                            ></Button>
+                        </Tooltip>
+                        <Tooltip content="Preview" dismissOnMouseOut preferredPosition="above">
+                            <Button
+                                onClick={() => window.open(`${hostOrigin}/apps/ca/bundle/${id}`, '_blank').focus()}
+                                disabled={deleting}
+                                icon={ViewMinor}
+                                accessibilityLabel="View bundle"
+                            ></Button>
+                        </Tooltip>
+                        <Tooltip content="Delete" dismissOnMouseOut preferredPosition="above">
+                            <Button 
+                                onClick={() => handleDelete(id)}
+                                disabled={deleting}
+                                icon={DeleteMinor}
+                                destructive
+                                accessibilityLabel="Remove bundle"
+                            ></Button>
+                        </Tooltip>
                     </ButtonGroup>
                 </IndexTable.Cell>
             </IndexTable.Row>
@@ -112,8 +131,8 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
                 itemCount={bundles.length}
                 headings={[
                     { title: 'Name' },
-                    { title: 'Status' },
                     { title: 'Items' },
+                    { title: 'Tiers' },
                     { title: 'Action' },
                 ]}
                 selectable={false}

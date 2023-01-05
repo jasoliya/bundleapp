@@ -272,12 +272,11 @@ export default function apiEndPoints(app) {
             var counter = data.id.match(/-?[0-9]$/gi);
             counter = counter === null ? 0 : parseInt(counter[0].replace('-',''));
             let handle = data.id;
-            
+
             while(handles.indexOf(handle) >= 0) {
                 counter++;
                 handle = data.id.replace(/-?[0-9]$/gi, '')+'-'+counter;
             }
-
             await setBundle(client, handle, bundle);
             res.status(200).send({handle: handle});
         } catch(error) {

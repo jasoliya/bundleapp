@@ -600,38 +600,43 @@ export function BundleForm({ Bundle: InitialBundle }) {
                                 <Spinner accessibilityLabel="Uploading image" size="large" />
                             </div>
                         ) : (
-                            <DropZone 
-                                accept="image/*" 
-                                allowMultiple={false} 
-                                dropOnPage 
-                                type="image" 
-                                errorOverlayText="File must be .gif, .jpg, or .png"
-                                onDrop={handleDrop}
-                                openFileDialog={activeImgDialogue}
-                                onFileDialogClose={() => setActiveImgDialogue(!activeImgDialogue)}
-                            >
-                                {previewImage ? (
-                                    <div className="preview-image">
-                                        <img 
-                                            alt={previewImage.name}
-                                            src={
-                                                validImageTypes.includes(previewImage.type)
-                                                    ? window.URL.createObjectURL(previewImage)
-                                                    : NoteMinor
-                                            }
-                                        />
-                                    </div>
-                                ) : (bundle?.image && !removed_image.value) ? (
-                                    <div className="preview-image">
-                                        <img 
-                                            alt={bundle.image.alt}
-                                            src={imageURL(bundle.image.url, 'large')}
-                                        />
-                                    </div>
-                                ) : (
-                                    <DropZone.FileUpload actionHint="or drop an image to upload" />
-                                )}                         
-                            </DropZone>
+                            <>
+                                <DropZone 
+                                    accept="image/*" 
+                                    allowMultiple={false} 
+                                    dropOnPage 
+                                    type="image" 
+                                    errorOverlayText="File must be .gif, .jpg, or .png"
+                                    onDrop={handleDrop}
+                                    openFileDialog={activeImgDialogue}
+                                    onFileDialogClose={() => setActiveImgDialogue(!activeImgDialogue)}
+                                >
+                                    {previewImage ? (
+                                        <div className="preview-image">
+                                            <img 
+                                                alt={previewImage.name}
+                                                src={
+                                                    validImageTypes.includes(previewImage.type)
+                                                        ? window.URL.createObjectURL(previewImage)
+                                                        : NoteMinor
+                                                }
+                                            />
+                                        </div>
+                                    ) : (bundle?.image && !removed_image.value) ? (
+                                        <div className="preview-image">
+                                            <img 
+                                                alt={bundle.image.alt}
+                                                src={imageURL(bundle.image.url, 'large')}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <DropZone.FileUpload actionHint="or drop an image to upload" />
+                                    )}                         
+                                </DropZone>
+                                <div className="space-top-1">
+                                    <Text color="subdued">Recommended size: 2000 x 600 px</Text>
+                                </div>
+                            </>
                         )}
                     </Card>
 

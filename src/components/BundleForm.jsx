@@ -383,6 +383,8 @@ export function BundleForm({ Bundle: InitialBundle }) {
                             onCancel={toggleProductPicker}
                             onSelection={handleSelection}
                             initialSelectionIds={initialProductsIds}
+                            showDraft={false}
+                            showHidden={false}
                         />
                         {productsInput.value ? (
                             <div className="rowList">

@@ -90,12 +90,12 @@ export default function apiEndPoints(app) {
             result['show_variants'] = bundle.show_variants;
             result['discount_name'] = bundle.discount_name;
             result['extra_class'] = bundle.extra_class;
-            result['products'] = metaProducts.edges.map((product) => {
+            result['products'] = metaProducts.edges.map(({ node }) => {
                 return {
-                    handle: product.node['handle'],
-                    id: product.node['id'],
-                    image: product.node['images'].edges[0].node['url'],
-                    title: product.node['title']
+                    handle: node['handle'],
+                    id: node['id'],
+                    image: node['images'].edges[0]?.node['url'],
+                    title: node['title']
                 }
             });
             if(bundle.description) result['description'] = bundle.description;
@@ -206,12 +206,12 @@ export default function apiEndPoints(app) {
             result['show_variants'] = data.show_variants;
             result['discount_name'] = data.discount_name;
             result['extra_class'] = data.extra_class;
-            result['products'] = metaProducts.edges.map((product) => {
+            result['products'] = metaProducts.edges.map(({node}) => {
                 return {
-                    handle: product.node['handle'],
-                    id: product.node['id'],
-                    image: product.node['images'].edges[0].node['url'],
-                    title: product.node['title']
+                    handle: node['handle'],
+                    id: node['id'],
+                    image: node['images'].edges[0]?.node['url'],
+                    title: node['title']
                 }
             });
             if(bundle.image) result['image'] = bundle.image;

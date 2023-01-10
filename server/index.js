@@ -1,146 +1,74 @@
 import { join } from 'path';
+import { readFileSync } from 'fs';
 import express from 'express';
+import serveStatic from 'serve-static';
 import dotenv from 'dotenv';
-import cookieParser from 'cookie-parser';
-import { Shopify, LATEST_API_VERSION } from '@shopify/shopify-api';
-import applyAuthMiddleware from './middleware/auth.js';
-import verifyRequest from './middleware/verify-request.js';
-import { setupGDPRWebHooks } from './gdpr.js';
-import { AppInstallation } from './app_installations.js';
-import redirectToAuth from './helpers/redirect-to-auth.js';
-import apiEndPoints from './middleware/api.js';
-import verifyAppProxyExtensionSignature from './middleware/verify-app-proxy-extension-signature.js';
-
 dotenv.config();
 
-const { PORT = 5000, SHOPIFY_API_KEY, SHOPIFY_API_SECRET, SCOPES, HOST } = process.env;
-const PROD_INDEX_PATH = `${process.cwd()}/dist`;
-const DB_PATH = `/${process.cwd()}/database.sqlite`;
+import shopify from './shopify.js';
+import GDPRWebhookHandlers from './gdpr.js';
+import bundleApiEndpoints from './middleware/bundle-api.js';
+import verifyAppProxyExtensionSignature from './middleware/verify-app-proxy-extension-signature.js';
 
-Shopify.Context.initialize({
-    API_KEY: SHOPIFY_API_KEY,
-    API_SECRET_KEY: SHOPIFY_API_SECRET,
-    SCOPES: SCOPES.split(','),
-    HOST_NAME: HOST.replace(/https?:\/\//,''),
-    HOST_SCHEME: HOST.split('://')[0],
-    API_VERSION: LATEST_API_VERSION,
-    IS_EMBEDDED_APP: true,
-    SESSION_STORAGE: new Shopify.Session.SQLiteSessionStorage(DB_PATH)
+const PORT = parseInt(process.env.PORT || 5000);
+const isDev = process.env.NODE_ENV === "development";
+const STATIC_PATH = `${process.cwd()}/dist`;
+
+const app = express();
+
+app.get(shopify.config.auth.path, shopify.auth.begin());
+app.get(
+    shopify.config.auth.callbackPath,
+    shopify.auth.callback(),
+    shopify.redirectToShopifyOrAppRoot()
+);
+app.post(
+    shopify.config.webhooks.path,
+    shopify.processWebhooks({ webhookHandlers: GDPRWebhookHandlers })
+);
+
+app.use('/api/*', shopify.validateAuthenticatedSession());
+
+app.use(express.json());
+
+bundleApiEndpoints(app);
+
+app.get('/bundle/:id', verifyAppProxyExtensionSignature, async (req, res) => {
+    res
+        .status(200)
+        .set('Content-Type', 'application/liquid')
+        .send(readFileSync(`${process.cwd()}/public/bundle.html`));
 });
 
-Shopify.Webhooks.Registry.addHandler('APP_UNINSTALLED', {
-    path: '/api/webhooks',
-    webhookHandler: async (_topic, shop, _body) => {
-        console.log('App uninstalled');
-        await AppInstallation.delete(shop);
-    }
-});
+//app.use("/*", shopify.ensureInstalledOnShop());
 
-setupGDPRWebHooks('/api/webhooks');
+if(isDev) {
+    const root = process.cwd();
+    let vite = await import('vite').then(({ createServer }) => 
+        createServer({
+            root,
+            server: {
+                port: PORT,
+                hmr: {
+                    protocol: "ws",
+                    host: "localhost",
+                    port: 64999,
+                    clientPort: 64999,
+                },
+                middlewareMode: true,
+            },
+        })
+    );
+    app.use(vite.middlewares);
+} else {
+    app.use(serveStatic(STATIC_PATH, { index: false }));
 
-export async function createAppServer(
-    root = process.cwd(),
-    isProd = process.env.NODE_ENV === "production"
-) {
-    const app = express();
-    
-    app.set("use-online-tokens", false);
-    app.use(cookieParser(Shopify.Context.API_SECRET_KEY));
-
-    applyAuthMiddleware(app);
-
-    app.post('/api/webhooks', async (req, res) => {
-        try {
-            await Shopify.Webhooks.Registry.process(req, res);
-        } catch (e) {
-            console.log(`Failed to process webhook ${e.message}`);
-            if(!res.headersSent) {
-                res.status(500).send(e.message);
-            }
-        }
-    });
-
-    app.use('/api/*', verifyRequest(app));
-
-    app.use(express.json());
-
-    apiEndPoints(app);
-
-    app.use((req, res, next) => {
-        const shop = req.query.shop;
-        if(shop) {
-            res.setHeader(
-                'Content-Security-Policy',
-                `frame-ancestors https://${shop} https://admin.shopify.com`
-            );
-        }
-        next();
-    });
-
-    app.use('/*', async (req, res, next) => {
-        const { shop } = req.query;
-        
-        if(shop) {
-            const appInstalled = await AppInstallation.includes(shop);
-                                    
-            if(!appInstalled) {
-                return redirectToAuth(req, res);
-            } else {
-                next();
-            }
-        } else {
-            next();
-        }
-    });
-
-    const fs = await import('fs');
-
-    app.get('/bundle/:id', verifyAppProxyExtensionSignature, async (req, res) => {
+    app.use("/*", shopify.ensureInstalledOnShop(), async (req, res, next) => {
         res
             .status(200)
-            .set('Content-Type', isProd ? 'application/liquid' : 'text/html')
-            .send(fs.readFileSync(`${process.cwd()}/public/bundle.html`));
+            .set("Content-Type", "text/html")
+            .send(readFileSync(join(STATIC_PATH, 'index.html')));
     });
-
-    let vite;
-    
-    if(isProd) {
-        const compression = await import('compression').then(
-            ({default: fn}) => fn
-        );
-        const serveStatic = await import('serve-static').then(
-            ({default: fn}) => fn
-        );
-        app.use(compression());
-        app.use(serveStatic(PROD_INDEX_PATH));
-        app.use('/*', (req, res, next) => {
-            res
-              .status(200)
-              .set('Content-Type', 'application/liquid')
-              .send(fs.readFileSync(join(PROD_INDEX_PATH, 'index.html')));
-        });  
-    } else {
-        vite = await import('vite').then(({ createServer }) => 
-            createServer({
-                root,
-                server: {
-                    port: PORT,
-                    hmr: {
-                        protocol: "ws",
-                        host: "localhost",
-                        port: 64999,
-                        clientPort: 64999,
-                    },
-                    middlewareMode: "true",
-                },
-            })
-        );
-
-        app.use(vite.middlewares);
-    }
-    return { app, vite };
 }
 
-createAppServer().then(({ app }) => app.listen(PORT, () => {
-    console.log(`server listen on port ${PORT}`);
-}));
+app.listen(PORT);

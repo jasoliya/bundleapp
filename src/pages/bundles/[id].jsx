@@ -8,7 +8,7 @@ export default function edit() {
     const navigate = useNavigate();
     const { id } = useParams();
     const {
-        data: Bundle,
+        data: result,
         isLoading,
         isRefetching
     } = useAppQuery({
@@ -19,7 +19,7 @@ export default function edit() {
     });
 
     if(!isLoading && !isRefetching) {
-        if(Bundle.error) {
+        if(result.error) {
             navigate('/notFound');
         }
     }
@@ -54,6 +54,6 @@ export default function edit() {
     }
 
     return (
-        <BundleForm Bundle={Bundle} />
+        <BundleForm Bundle={result.data} />
     )
 }

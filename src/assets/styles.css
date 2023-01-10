@@ -13,6 +13,7 @@
 .grid-uniform { margin-top: calc(var(--pc-stack-spacing) * -1); margin-left: calc(var(--pc-stack-spacing) * -1); flex-wrap: wrap; }
 .grid-uniform > div { padding-top: var(--pc-stack-spacing); padding-left: var(--pc-stack-spacing); }
 
+.space-top-1 { margin-top: var(--p-space-1); }
 .space-top-6 { padding-top: var(--p-space-6); }
 .space-bottom-5 { padding-bottom: var(--p-space-5); }
 

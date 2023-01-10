@@ -34,31 +34,35 @@ export default function FrameContainer({ children }) {
     ) : null;
     
     const navigationMarkup = (
-        <Navigation location="/">
+        <Navigation location={pathname}>
             <Navigation.Section
                 items={[
                     {
                         label: 'Home',
                         icon: HomeMinor,
-                        selected: pathname === '/',
+                        url: '/',
+                        exactMatch: true,
                         onClick: () => navigate('/')
                     },
                     {
                         label: 'Bundles',
                         icon: GiftCardMinor,
-                        selected: pathname.indexOf('bundles') >= 0,
+                        url: '/bundles',
+                        exactMatch: true,
                         onClick: () => navigate('/bundles')
                     },
                     {
                         label: 'Settings',
                         icon: SettingsMinor,
-                        selected: pathname.indexOf('settings') >= 0,
+                        url: '/settings',
+                        exactMatch: true,
                         onClick: () => navigate('/settings')
                     },
                     {
                         label: 'Help',
                         icon: QuestionMarkMinor,
-                        selected: pathname.indexOf('/help') >= 0,
+                        url: '/help',
+                        exactMatch: true,
                         onClick: () => navigate('/help')
                     }
                 ]}

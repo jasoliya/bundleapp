@@ -24,8 +24,8 @@ export default function HomePage() {
     } = useAppQuery({
         url: '/api/bundles',
         reactQueryOptions: {
-            onSuccess: (data) => {
-                setBundles(data);
+            onSuccess: (result) => {
+                setBundles(result.data);
             }
         }
     });     
@@ -47,7 +47,6 @@ export default function HomePage() {
                         <SkeletonBodyText lines={1} />
                         <SkeletonBodyText lines={1} />
                     </Stack>
-                    
                 </Card>
             </SkeletonPage>
         );

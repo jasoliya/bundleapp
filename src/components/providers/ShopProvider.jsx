@@ -9,8 +9,8 @@ export function ShopProvider({ children }) {
     useAppQuery({
         url:'/api/dashboard',
         reactQueryOptions: {
-            onSuccess: (data) => {
-                setShop({...data});
+            onSuccess: (result) => {
+                setShop(result.data);
             }
         }
     });

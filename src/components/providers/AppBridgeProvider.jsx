@@ -8,7 +8,7 @@ export function AppBridgeProvider({children}) {
     const host = new URLSearchParams(location.search).get('host') || window.__SHOPIFY_DEV_HOST;
     window.__SHOPIFY_DEV_HOST = host;   
 
-    const API_KEY = process.env.SHOPIFY_API_KEY;
+    const API_KEY = import.meta.env.VITE_SHOPIFY_API_KEY;
 
     const history = useMemo(
         () => ({

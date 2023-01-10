@@ -1,4 +1,5 @@
-import { Shopify } from "@shopify/shopify-api";
+import { Shopify, GraphqlQueryError } from "@shopify/shopify-api";
+import shopify from "../shopify.js";
 import { APP_INSTALLATION, APP_META, APP_META_GROUP, GET_IMAGE, GET_PRODUCTS, IMG_REMOVE, IMG_UPLOAD, REMOVE_META, SET_METAFIELD } from "./api-query.js";
 
 export const poll = async ({ fn, validate, interval, maxAttempts, errorMsg }) => {
@@ -20,7 +21,9 @@ export const poll = async ({ fn, validate, interval, maxAttempts, errorMsg }) =>
     return new Promise(executePoll);
 };
 
-export async function getUploadedImage(client, mediaId) {
+export async function getUploadedImage(session, mediaId) {
+    const client = new shopify.api.clients.Graphql({ session });
+    
     return await poll({
         fn: async () => {
             const {
@@ -51,54 +54,84 @@ export async function getUploadedImage(client, mediaId) {
     });
 }
 
-export async function uploadImage(client, altText, resourseUrl) {
-    const {
-        body: {
-            data: {
-                fileCreate: {
-                    files: [
-                        {
-                            id: mediaId
-                        }
-                    ]
-                }
-            }
-        }
-    } = await client.query({
-        data: {
-            query: IMG_UPLOAD,
-            variables: {
-                files: {
-                    alt: altText,
-                    contentType: 'IMAGE',
-                    originalSource: resourseUrl
-                }
-            }
-        }
-    });
+export async function uploadImage(session, altText, resourseUrl) {
+    const client = new shopify.api.clients.Graphql({ session });
 
-    return mediaId;
+    let data = null;
+
+    try {
+        const {
+            body: {
+                data: {
+                    fileCreate: {
+                        files: [
+                            {
+                                id: mediaId
+                            }
+                        ]
+                    }
+                }
+            }
+        } = await client.query({
+            data: {
+                query: IMG_UPLOAD,
+                variables: {
+                    files: {
+                        alt: altText,
+                        contentType: 'IMAGE',
+                        originalSource: resourseUrl
+                    }
+                }
+            }
+        });
+        data = mediaId;
+    } catch(e) {
+        if (e instanceof GraphqlQueryError) {
+            throw new Error(
+                `${e.message}\n${JSON.stringify(e.response, null, 2)}`
+            );
+        } else {
+            throw e;
+        }
+    }
+
+    return data;
 }
 
-export async function removeImage(client, removeId) {
-    const {
-        body: {
-            data: {
-                fileDelete: {
-                    deletedFileIds
+export async function removeImage(session, removeId) {
+    const client = new shopify.api.clients.Graphql({ session });
+
+    let data = null;
+
+    try {
+        const {
+            body: {
+                data: {
+                    fileDelete: {
+                        deletedFileIds
+                    }
                 }
             }
-        }
-    } = await client.query({
-        data: {
-            query: IMG_REMOVE,
-            variables: {
-                fileIds: [removeId]
+        } = await client.query({
+            data: {
+                query: IMG_REMOVE,
+                variables: {
+                    fileIds: [removeId]
+                }
             }
+        });
+        data = deletedFileIds;
+    } catch(e) {
+        if (e instanceof GraphqlQueryError) {
+            throw new Error(
+                `${e.message}\n${JSON.stringify(e.response, null, 2)}`
+            );
+        } else {
+            throw e;
         }
-    });
+    }
 
-    return deletedFileIds;
+    return data;
 }
 
 export function serialize(obj) {
@@ -121,145 +154,218 @@ export async function getSession(req, res) {
     return undefined;
 }
 
-export async function getBundles(client) {
-    const {
-        body: {
-            data: {
-                currentAppInstallation: {
-                    metafields
-                }
-            }
-        }
-    } = await client.query({
-        data: {
-            query: APP_META_GROUP,
-            variables: {
-                namespace: 'cdapp_bundles'
-            }
-        }
-    });
+export async function getBundles(session) {
+    const client = new shopify.api.clients.Graphql({ session });
+    let data = null;
 
-    return metafields;
-}
-
-export async function getBundle(client, bundleId) {
-    const {
-        body: {
-            data: {
-                currentAppInstallation: {
-                    metafield
-                }
-            }
-        }
-    } = await client.query({
-        data: {
-            query: APP_META,
-            variables: {
-                namespace: 'cdapp_bundles',
-                key: `bundle_${bundleId}`
-            }
-        }
-    });
-
-    return metafield;
-}
-
-export async function setBundle(client, bundleId, bundle) {
-    const {
-        body: {
-            data: {
-                currentAppInstallation: {
-                    id: appInstallationId
-                }
-            }
-        }            
-    } = await client.query({
-        data: {
-            query: APP_INSTALLATION
-        }            
-    });
-
-    const {
-        body: {
-            data: {
-                metafieldsSet: {
-                    metafields
-                }
-            }
-        }
-    } = await client.query({
-        data: {
-            query: SET_METAFIELD,
-            variables: {
-                input: [
-                    {
-                        ownerId: appInstallationId,
-                        type: "json",
-                        namespace: "cdapp_bundles",
-                        key: `bundle_${bundleId}`,
-                        value: JSON.stringify(bundle)
+    try {
+        const {
+            body: {
+                data: {
+                    currentAppInstallation: {
+                        metafields
                     }
-                ]
-            }
-        }
-    });
-
-    return JSON.parse(metafields[0].value);
-}
-
-export async function getBundleProducts(client, bundle) {
-    let query = bundle.products.split('||');
-    query = query.map((item) => {
-        const item_id = item.split('=')[0];
-        return `id:${item_id}`
-    });
-    const query_str = query.join(' OR ');
-    
-    const {
-        body: {
-            data: {
-                products: metaProducts
-            }
-        }
-    } = await client.query({
-        data: {
-            query: GET_PRODUCTS,
-            variables: {
-                first: 24,
-                query: query_str
-            }
-        }
-    });
-
-    return metaProducts;
-}
-
-export async function removeBundle(client, bundleId) {
-    const bundleMeta = await getBundle(client, bundleId);
-
-    if(!bundleMeta) return undefined;
-
-    const bundle = JSON.parse(bundleMeta.value);
-    if(bundle.image) removeImage(client, bundle.image.id);
-    
-    const {
-        body: {
-            data: {
-                metafieldDelete: {
-                    deletedId
                 }
             }
-        }
-    } = await client.query({
-        data: {
-            query: REMOVE_META,
-            variables: {
-                input: {
-                    id: bundleMeta.id
+        } = await client.query({
+            data: {
+                query: APP_META_GROUP,
+                variables: {
+                    namespace: 'cdapp_bundles'
                 }
             }
-        }
-    });
+        });
 
-    return deletedId;
+        data = metafields;
+    } catch(e) {
+        if (e instanceof GraphqlQueryError) {
+            throw new Error(
+                `${e.message}\n${JSON.stringify(e.response, null, 2)}`
+            );
+        } else {
+            throw e;
+        }
+    }
+
+    return data;
+}
+
+export async function getBundle(session, bundleId) {
+    const client = new shopify.api.clients.Graphql({ session });
+    let data = null;
+
+    try {
+        const {
+            body: {
+                data: {
+                    currentAppInstallation: {
+                        metafield
+                    }
+                }
+            }
+        } = await client.query({
+            data: {
+                query: APP_META,
+                variables: {
+                    namespace: 'cdapp_bundles',
+                    key: `bundle_${bundleId}`
+                }
+            }
+        });
+        data = metafield;
+    } catch(e) {
+        if (e instanceof GraphqlQueryError) {
+            throw new Error(
+                `${e.message}\n${JSON.stringify(e.response, null, 2)}`
+            );
+        } else {
+            throw e;
+        }
+    }
+
+    return data;
+}
+
+export async function setBundle(session, bundleId, bundle) {
+    const client = new shopify.api.clients.Graphql({ session });
+    let data = null;
+
+    try {
+        const {
+            body: {
+                data: {
+                    currentAppInstallation: {
+                        id: appInstallationId
+                    }
+                }
+            }            
+        } = await client.query({
+            data: {
+                query: APP_INSTALLATION
+            }            
+        });
+    
+        const {
+            body: {
+                data: {
+                    metafieldsSet: {
+                        metafields
+                    }
+                }
+            }
+        } = await client.query({
+            data: {
+                query: SET_METAFIELD,
+                variables: {
+                    input: [
+                        {
+                            ownerId: appInstallationId,
+                            type: "json",
+                            namespace: "cdapp_bundles",
+                            key: `bundle_${bundleId}`,
+                            value: JSON.stringify(bundle)
+                        }
+                    ]
+                }
+            }
+        });
+
+        data = JSON.parse(metafields[0].value);
+    } catch(e) {
+        if (e instanceof GraphqlQueryError) {
+            throw new Error(
+                `${e.message}\n${JSON.stringify(e.response, null, 2)}`
+            );
+        } else {
+            throw e;
+        }
+    }
+
+    return data;
+}
+
+export async function getBundleProducts(session, bundle) {
+    const client = new shopify.api.clients.Graphql({ session });
+    let data = null;
+
+    try {
+        let query = bundle.products.split('||');
+        query = query.map((item) => {
+            const item_id = item.split('=')[0];
+            return `id:${item_id}`
+        });
+        const query_str = query.join(' OR ');
+        
+        const {
+            body: {
+                data: {
+                    products: metaProducts
+                }
+            }
+        } = await client.query({
+            data: {
+                query: GET_PRODUCTS,
+                variables: {
+                    first: 24,
+                    query: query_str
+                }
+            }
+        });
+
+        data = metaProducts;
+    } catch(e) {
+        if (e instanceof GraphqlQueryError) {
+            throw new Error(
+                `${e.message}\n${JSON.stringify(e.response, null, 2)}`
+            );
+        } else {
+            throw e;
+        }
+    }
+
+    return data;
+}
+
+export async function removeBundle(session, bundleId) {
+    const client = new shopify.api.clients.Graphql({ session });
+    let data = null;
+
+    try {
+        const bundleMeta = await getBundle(session, bundleId);
+
+        const bundle = JSON.parse(bundleMeta.value);
+        if(bundle.image) removeImage(session, bundle.image.id);
+        
+        const {
+            body: {
+                data: {
+                    metafieldDelete: {
+                        deletedId
+                    }
+                }
+            }
+        } = await client.query({
+            data: {
+                query: REMOVE_META,
+                variables: {
+                    input: {
+                        id: bundleMeta.id
+                    }
+                }
+            }
+        });
+
+        data = deletedId;
+
+    } catch(e) {
+        if (e instanceof GraphqlQueryError) {
+            throw new Error(
+                `${e.message}\n${JSON.stringify(e.response, null, 2)}`
+            );
+        } else {
+            throw e;
+        }
+    }
+
+    return data;
 }

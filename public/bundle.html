@@ -1,28 +1,771 @@
-<link rel="stylesheet" href="bundle.css"> 
-<div class="cdapp-bundle-page">
-    <div class="cdapp-bundle-container">
-        <h1 class="cdapp-bundle-heading">Bundle page</h1>
-        {% assign bundles_meta = app.metafields.cdapp_bundle.bundles.value %}
-        <p class="cdapp-bundle-text">Content of your bundle page shown here: {{ request.path }}</p>
-        <ul>
-            {% for key_value in bundles_meta['bundles'] %}
-                <li>
-                    <strong>{{ key_value[0] }}: </strong>
-                    {{ key_value[1]['products'] }}
-                    {% assign products_arr = key_value[1]['products'] | split: '||' %}
-                    <ul>
-                        {% for product_str in products_arr %}
-                            <li>
-                                {% assign product_handle = product_str | split: '=' | last %}
-                                {% assign product = all_products[product_handle] %}
-                                {{ product.title }}<br>
-                                {{ product.price | money }}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                    
-                </li>
+{% capture bundle_key %}bundle_{{ request.path | split: '/' | last }}{% endcapture %}
+{% if app.metafields.cdapp_bundles[bundle_key] != blank %}
+  {% assign meta = app.metafields.cdapp_bundles[bundle_key].value %}
+  {% assign general_settings = app.metafields.cdapp_bundles.settings.value %}
+  
+  <style>
+    .cpbundle_width {padding: 0 20px;margin: 0 auto;}
+    
+    .cpbundle_header {padding: 36px 0;text-align: {{ general_settings.align_page_text | default: 'left' }};}
+    
+    .cpbundle_grid {display: flex;flex-wrap: wrap;}
+    .cpbundle_gridImage img {width: 100%;}      
+    
+    {% if settings.page_width != 'full' %}
+      .cpbundle_width {max-width: {{ general_settings.page_width | default: 1440 }}px;}
+    {% endif %}
+
+    .cpbundle_container img {display: block;max-width: 100%;}
+
+    .cpbundle_container { color: {{ general_settings.body_color | default: '#000000' }}; text-align: left; font-size: {{ general_settings.body_font_size | default: 16 }}px; letter-spacing: normal; line-height: normal; padding-bottom: 36px; }
+    .cpbundle_container p { margin: 0 0 1em; line-height: normal; }
+    .cpbundle_container p:last-child { margin-bottom: 0; }
+    .cpbundle_container h1, .cpbundle_container h2 { color: {{ general_settings.primary_color | default: '#000000' }}; font-size: {{ general_settings.primary_font_size | default: 26 }}px; margin: 0 0 0.625em; letter-spacing: normal; }
+    .cpbundle_container h3 { font-size: {{ general_settings.secondary_font_size | default: 20 }}px; }
+    .cpbundle_container h3, .cpbundle_container h4, .cpbundle_container h5, .cpbundle_container h6 { color: {{ general_settings.secondary_color | default: '#000000' }}; margin: 0 0 0.625em; letter-spacing: normal; }
+    .cpbundle_container button {padding: 6px 12px !important; line-height: 1.5 !important;box-shadow: none;min-width: auto;transition: 0.25s ease;}
+    .cpbundle_container button svg {width: 10px;height: 10px;fill: currentColor;display: block;}
+    .cpbundle_container select {padding: 8px 12px;appearance: auto;background-image: none;font-size: {{ general_settings.body_font_size | default: 16 }}px;color: {{ general_settings.body_color | default: '#000000' }};}
+    .cpbundle_container button, .cpbundle_container select { border-radius: {{ general_settings.button_corner_radius | default: 4 }}px; height: auto !important; margin: 0; display: block; border: 1px solid {{ general_settings.button_text_color | default: '#000000' }}; cursor: pointer; }
+    .cpbundle_container .cpbundle_button { font-size: {{ general_settings.button_font_size | default: 16 }}px; color: {{ general_settings.button_text_color | default: '#000000' }}; background-color: {{ general_settings.button_back_color | default: '#ffffff' }}; }
+    .cpbundle_container .cpbundle_button:not(:disabled):hover { color: {{ general_settings.button_hover_text_color | default: '#ffffff' }}; background-color: {{ general_settings.button_hover_back_color | default: '#000000' }}; }
+    .cpbundle_container .cpbundle_button.cpbundle_loading .cpbundle_btnText {display: none;}
+    .cpbundle_container .cpbundle_button:not(.cpbundle_loading) .cpbundle_btnLoader {display: none;}
+    .cpbundle_container .cpbundle_button .cpbundle_btnLoader svg { width: 24px; height: 24px; margin: 0 auto; }
+    .cpbundle_container .cpbundle_note {margin-top: 8px;font-size: 14px;}
+  
+    .cpbundle_grid { margin-left: -{{ general_settings.grid_x_spacing | default: 24 }}px; margin-bottom: -{{ general_settings.grid_y_spacing | default: 24 }}px; }
+    .cpbundle_gridItem { width: calc(100% / {{ general_settings.grid_size_mobile | default: '1' }}); }
+    
+    .cpbundle_gridInner { padding-left: {{ general_settings.grid_x_spacing | default: 24 }}px; padding-bottom: {{ general_settings.grid_y_spacing | default: 24 }}px; }
+    .cpbundle_gridImage { margin-bottom: 20px; }
+    .cpbundle_gridInfo .cpbundle_gridTitle { margin-bottom: 4px;font-size: {{ general_settings.button_font_size | default: 16 }}px;text-align: {{ general_settings.align_grid_text | default: 'left' }}; }
+    .cpbundle_gridInfo .cpbundle_gridTitle > a {font-size: inherit;color: inherit;text-decoration: none;}
+    .cpbundle_gridInfo .cpbundle_gridTitle > a:hover {color: inherit;text-decoration: none;}
+    .cpbundle_gridInfo .cpbundle_gridPricing {text-align: {{ general_settings.align_grid_text | default: 'left' }};}
+    .cpbundle_gridInfo .cpbundle_gridPrice { display: inline-block; vertical-align: middle; margin-right: 12px; }
+    .cpbundle_gridInfo .cpbundle_gridSelection { display: flex; flex-wrap: wrap; margin-left: -10px; margin-bottom: 6px; }
+    .cpbundle_gridInfo .cpbundle_gridSelection select { width: 100%; min-width: 0; }
+    .cpbundle_gridInfo .cpbundle_gridSelectionItem {padding-left: 10px;padding-bottom: 10px;flex: 1 1 auto;}
+    .cpbundle_gridInfo .cpbundle_gridAction { margin-top: 16px; }
+    .cpbundle_gridInfo .cpbundle_gridAction .cpbundle_addButton { width: 100%; }
+    .cpbundle_gridInfo .cpbundle_gridAction.cpbundle_added .cpbundle_addButton { display: none; }
+    .cpbundle_gridInfo .cpbundle_gridAction:not(.cpbundle_added) .cpbundle_qtybox { display: none; }
+    .cpbundle_gridInfo .cpbundle_addButton.cpbundle_soldOut .cpbundle_btnText {display: none;}
+    .cpbundle_gridInfo .cpbundle_addButton:not(.cpbundle_soldOut) .cpbundle_btnSoldOutText {display: none;}
+    
+    .cpbundle_qtybox {display: flex;align-items: center;font-size: {{ general_settings.button_font_size | default: 16 }}px;border-radius: {{ general_settings.button_corner_radius | default: 4 }}px;line-height: 1.5;color: {{ general_settings.button_hover_text_color | default: '#ffffff' }};padding: 6px 10px;border: 1px solid {{ general_settings.button_text_color | default: '#000000' }};background-color: {{ general_settings.button_hover_back_color | default: '#000000' }}; }
+    .cpbundle_qtybox button {background-color: transparent;border: none;padding: 4px 6px;color: inherit;}
+    .cpbundle_qtybox .cpbundle_qty {flex: 1 1 auto;text-align: center}
+
+    .cpbundle_layout {display: flex;align-items: flex-start;flex-wrap: wrap;margin-left: -20px;margin-bottom: -20px;}
+    .cpbundle_primary {flex: 1 1 calc(100% - 320px);padding-left: 20px;padding-bottom: 20px;}
+    .cpbundle_secondary { width: 320px; padding-left: 20px; padding-bottom: 20px;} 
+    
+    .cpbundle_boxed { border: 1px solid rgba(0, 0, 0, 0.08); position: relative; padding: 16px; }
+    .cpbundle_boxed .cpbundle_boxTitle { border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 0.5em; margin-bottom: 0.5em; }
+    .cpbundle_container .cpbundle_boxClose { position: absolute; top: 16px; right: 16px; background-color: transparent; color: {{ general_settings.body_color | default: '#000000' }}; border: none; padding: 6px !important; }
+
+    .cpbundle_boxLine {display: flex;justify-content: space-between;align-items: flex-start;padding: 6px 0;}
+    .cpbundle_boxLine .cpbundle_label {padding-right: 12px;}
+
+    .cpbundle_boxItems {border-bottom: 1px solid rgba(0,0,0,0.08);padding-bottom: 10px;margin-bottom: 10px;max-height: 260px; overflow-y: auto;}
+    .cpbundle_boxItems:empty {display: none;}
+    .cpbundle_boxItems .cpbundle_label { font-size: 12px; position: relative; padding-left: 22px;}
+    .cpbundle_boxItems .cpbundle_value {flex-shrink: 0;text-align: right;}
+    .cpbundle_boxItems .cpbundle_value span {display: block;}
+    .cpbundle_boxItems .cpbundle_value .cpbundle_salePrice {color: {{ general_settings.sale_text_color | default: '#b12704' }};}
+    .cpbundle_boxItems .cpbundle_value .cpbundle_boxItemComparePrice {font-size: 12px; text-decoration: line-through;}
+    .cpbundle_boxItems .cpbundle_close { background-color: transparent;color: {{ general_settings.body_color | default: '#000000' }};border: none;padding: 4px !important;position: absolute;left: 0;top: 2px;}
+    .cpbundle_boxItems .cpbundle_boxItemName { font-size: 16px; margin-right: 4px; }
+    .cpbundle_boxItems .cpbundle_withVariant .cpbundle_boxItemName { display: block; }
+  
+    .cpbundle_discountLine .cpbundle_value {color: {{ general_settings.sale_text_color | default: '#b12704' }};}
+    .cpbundle_discountLine .cpbundle_discountPercent { color: {{ general_settings.sale_text_color | default: '#b12704' }}; }
+    .cpbundle_primaryLine {font-size: 18px;border-top: 1px dashed rgba(0, 0, 0, 0.1);padding: 10px 0;margin-top: 10px;}
+    .cpbundle_boxAction button {width: 100%;}
+    .cpbundle_promoLine {color: {{ general_settings.sale_text_color | default: '#b12704' }};padding: 8px 0;border-top: 1px dashed rgba(0, 0, 0, 0.1);}
+    .cpbundle_boxAction {margin-top: 10px;}
+
+    .cpbundle_container .cpbundle_toggleBox:not(.cpbundle_active) { display: none; }
+    .cpbundle_container .cpbundle_toggleBox { color: {{ general_settings.button_hover_text_color | default: '#ffffff' }}; background-color: {{ general_settings.button_hover_back_color | default: '#000000' }};position: fixed; bottom: 20px; left: 20px; right: 20px;z-index: 999; }  
+    .cpbundle_toggleBox .cpbundle_buttonIcon { display: inline-block; margin-left: 4px; color: inherit;transition: 0.25s ease; }
+    .cpbundle_toggleBox.cpbundle_boxOpened .cpbundle_buttonIcon {transform: rotate(180deg);}
+    .cpbundle_container .cpbundle_minNote {color: #ff3333;}
+    
+    .cpbundle_hide {display: none !important;}
+
+    .cpbundle_button:disabled {opacity: 0.6; cursor: not-allowed;} 
+
+    @media (max-width: 767px) {
+      .cpbundle_boxPopupSm:not(.cpbundle_active) { visibility: hidden;transform: translateY(calc(100% + 80px)); }
+      .cpbundle_boxPopupSm {position: fixed;max-width: 300px; margin-left: auto;top: auto; bottom: 78px; left: 30px; right: 30px; padding-left: 0;padding-bottom: 0;background-color: #ffffff;transform: translateY(0);transition: 0.25s ease-out;z-index: 999;}      
+    }
+
+    @media (max-width: 599px) {
+      .cpbundle_boxPopupSm {bottom: 68px;left: 20px; right: 20px;}
+    }
+  
+    @media (max-width: 479px) {
+      .cpbundle_boxPopupSm { width: auto; max-width: none; }
+    }
+  
+    @media (min-width: 480px) {
+      .cpbundle_container .cpbundle_toggleBox { max-width: 300px; margin-left: auto; }
+    }
+      
+    @media (min-width: 600px) {
+      .cpbundle_width {padding: 0 30px; }
+  
+      .cpbundle_gridItem { width: calc(100% / 3); }
+
+      .cpbundle_container .cpbundle_toggleBox { bottom: 30px; left: 30px; right: 30px;}
+    }
+
+    @media (min-width: 768px) {
+      .cpbundle_container .cpbundle_smUpHide {display: none !important;}
+      .cpbundle_width {padding: 0 50px;}
+
+      .cpbundle_gridItem { width: calc(100% / 2); }
+
+      .cpbundle_boxItems {max-height: 340px;}
+      .cpbundle_boxPopupSm {position: sticky;top: 20px;}
+    }
+  
+    @media (min-width: 992px) {
+      .cpbundle_layout {margin-left: -28px;margin-bottom: -28px;}
+      .cpbundle_primary {flex: 1 1 calc(100% - 350px);padding-left: 28px;padding-bottom: 28px;}
+      .cpbundle_secondary {width: 350px;padding-left: 28px;padding-bottom: 28px;}
+      .cpbundle_boxPopupSm {top: 28px;}
+  
+      .cpbundle_gridItem { width: calc(100% / 3); }
+    }
+  
+    @media (min-width: 1200px) {
+      .cpbundle_gridItem { width: calc(100% / {{ general_settings.grid_size_desktop | default: '3' }}); }
+
+      .cpbundle_banner { position: relative; padding-top: 30%; }
+      .cpbundle_banner img { position: absolute; top: 0; left: 0; right: 0; bottom: 0; max-width: 100%; max-height: 100%; margin: auto; }
+    }
+
+    {{ general_settings.custom_css }}
+  </style>
+
+  {% capture closeIcon %}
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M23 20.168l-8.185-8.187 8.185-8.174-2.832-2.807-8.182 8.179-8.176-8.179-2.81 2.81 8.186 8.196-8.186 8.184 2.81 2.81 8.203-8.192 8.18 8.192z"/></svg>
+  {% endcapture %}
+
+  {% capture plusIcon %}
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/></svg>
+  {% endcapture %}
+
+  {% capture minusIcon %}
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 10h24v4h-24z"/></svg>
+  {% endcapture %}
+
+  {% capture upArrow %}
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 16.67l2.829 2.83 9.175-9.339 9.167 9.339 2.829-2.83-11.996-12.17z"/></svg>
+  {% endcapture %}
+
+  {% capture loaderIcon %}
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" xml:space="preserve">
+      <path fill="#000" d="M43.935,25.145c0-10.318-8.364-18.683-18.683-18.683c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615c8.072,0,14.615,6.543,14.615,14.615H43.935z">
+        <animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.6s" repeatCount="indefinite"></animateTransform>
+      </path>
+    </svg>
+  {% endcapture %}
+
+  <div class="cpbundle_container {{ meta.extra_class }}" data-id="{{ request.path | split: '/' | last }}" data-currency="{{ shop.money_format }}">
+    {% if meta.image != blank %}
+      <div class="cpbundle_banner">
+        <img src="{{ meta.image.url }}" />
+      </div>
+    {% endif %}
+
+    <div class="cpbundle_width">
+      <div class="cpbundle_header">
+        <h1 class="cpbundle_title">{{ meta.title }}</h1>
+        {% if meta.description != blank %}
+          <div class="cpbundle_desc">
+            {{ meta.description }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="cpbundle_width">
+      <div class="cpbundle_layout">
+        <div class="cpbundle_primary">
+          <div class="cpbundle_grid">
+            {% assign meta_products = meta.products | split: '||' %}
+            {% for meta_product in meta_products %}
+              {% assign product_handle = meta_product | split: '=' | last %}
+              {% assign product = all_products[product_handle] %}
+              <div class="cpbundle_gridItem">
+                <div class="cpbundle_gridInner">
+                  {% if product.featured_image %}
+                    <div class="cpbundle_gridImage">
+                      <a href="{{ product.url }}">
+                        <img src="{{ product.featured_image | img_url: 'large' }}" />
+                      </a>
+                    </div>
+                  {% endif %}
+                  <div class="cpbundle_gridInfo">
+                    {% assign selected_variant = product.selected_or_first_available_variant %}
+              
+                    <h4 class="cpbundle_gridTitle"><a href="{{ product.url }}">{{ product.title }}</a></h4>
+                    <div class="cpbundle_gridPricing">
+                      <span class="cpbundle_gridPrice" data={{ selected_variant.price }}>{{ selected_variant.price | money }}</span>
+                    </div>
+    
+                    <div class="cpbundle_gridAction">
+                      {% if meta.show_variants %}
+                        {% unless product.has_only_default_variant %}
+                          <div class="cpbundle_gridSelection">
+                            {% for option in product.options_with_values %}
+                              {% assign opt_index = forloop.index0 %}
+                              <div class="cpbundle_gridSelectionItem">
+                                <label>{{ option.name }}</label>
+                                <select class="cpbundle_variantOption">
+                                  {% for value in option.values %}
+                                    <option value="{{ value }}"{% if selected_variant.options[opt_index] == value %} selected{% endif %}>{{ value }}</option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                            {% endfor %}
+                          </div>
+                          <script type="application/json" class="cpbundle_variants">
+                            {
+                              {% for variant in product.variants %}
+                              {{ variant.title | json }}: {
+                                "available": {{ variant.available }},
+                                "id": {{ variant.id | json }},
+                                "price": {{ variant.price | json }}
+                              }{% unless forloop.last %},{% endunless %}
+                              {% endfor %}
+                            }
+                          </script>
+                        {% endunless %}
+                      {% endif %}
+                      
+                      <button class="cpbundle_button cpbundle_addButton{% unless selected_variant.available %} cpbundle_soldOut{% endunless %}" data-id={{ product.id }} data-item-id="{{ selected_variant.id }}"{% unless selected_variant.available %} disabled{% endunless %}>
+                        <span class="cpbundle_btnText">{{ general_settings.text_add | default: 'Add' }}</span>
+                        <span class="cpbundle_btnSoldOutText">{{ general_settings.text_soldout | default: 'Sold out' }}</span>
+                      </button>
+
+                      <div class="cpbundle_qtybox" data-id={{ product.id }} data-item-id="{{ selected_variant.id }}">
+                        <button class="cpbundle_qtyBtn cpbundle_minus">{{ minusIcon }}</button>
+                        <span class="cpbundle_qty"><span class="cpbundle_addedCount"></span> Added</span>
+                        <button class="cpbundle_qtyBtn cpbundle_plus">{{ plusIcon }}</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             {% endfor %}
-        </ul>
-    </div>    
-</div>
+          </div>
+        </div> 
+
+        <div class="cpbundle_secondary cpbundle_boxPopupSm">
+          <div class="cpbundle_boxed">
+            <h3 class="cpbundle_boxTitle">{{ general_settings.text_price_heading | default: 'Price details' }}</h3>
+            <button class="cpbundle_smUpHide cpbundle_boxClose">{{ closeIcon }}</button>
+            <div class="cpbundle_boxLines">
+              <div class="cpbundle_boxItems"></div>
+              <div class="cpbundle_boxLine">
+                <div class="cpbundle_label">Total price (<span class="cpbundle_addedItemsCount">0</span> items)</div>
+                <div class="cpbundle_value cpbundle_subTotal">{{ 0 | money }}</div>
+              </div>
+              <div class="cpbundle_boxLine cpbundle_discountLine cpbundle_hide">
+                <div class="cpbundle_label">Discount <span class="cpbundle_discountPercent"></span></div>
+                <div class="cpbundle_value"><span class="cpbundle_discount"></span></div>
+              </div>
+              <div class="cpbundle_boxLine cpbundle_primaryLine">
+                <div class="cpbundle_label cpbundle_boldText">Subtotal</div>
+                <div class="cpbundle_value cpbundle_boldText cpbundle_total">{{ 0 | money }}</div>
+              </div>
+              <div class="cpbundle_promoLine cpbundle_hide">{{ general_settings.text_save_amount | default: 'You will save [amount] on this order.' | replace: '[amount]', '<span class="cpbundle_saveAmount"></span>' }}</div>
+              <div class="cpbundle_boxAction">
+                <button class="cpbundle_button cpbundle_checkoutButton" disabled>
+                  <span class="cpbundle_btnText">{{ general_settings.text_checkout | default: 'Checkout' }}</span>
+                  <span class="cpbundle_btnIcon cpbundle_btnLoader">{{ loaderIcon }}</span>
+                </button>
+              </div>
+              {% if meta.minimum_threshold > 0 %}
+                <p class="cpbundle_note cpbundle_minNote cpbundle_hide">
+                  {% assign discount_trigger = meta.discount_trigger | default: 'total_products' %}
+                  {% capture amount %}
+                    {% assign amount_required = meta.minimum_threshold %}
+                    {% if meta.discount_trigger == 'total_products' %}{{ amount_required }}{% else %}{{ amount_required | times: 100 | money }}{% endif %}
+                  {% endcapture %}
+                  {% capture unit %}
+                    {% if meta.discount_trigger == 'total_products' %}quantity{% else %}price{% endif %}
+                  {% endcapture %}
+                  {{ general_settings.text_min_required | default: 'Minimum [amount] [unit] is required to checkout.' | replace: '[amount]', amount | replace: '[unit]', unit }}
+                </p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <button class="cpbundle_button cpbundle_smUpHide cpbundle_toggleBox"><span class="cpbundle_addedItemsCount">0</span> items added <span class="cpbundle_buttonIcon">{{ upArrow }}</span></button>
+      </div>  
+    </div>
+  </div>
+  
+  <script type="text/javascript">
+    const cpbundle_settings = {
+      discount_type: {{ meta.discount_type | json }},
+      discount_trigger: {{ meta.discount_trigger | json }},
+      discount_tiers: {{ meta.discount_tiers | json }},
+      minimum_threshold: {{ meta.minimum_threshold | default: -1 }},
+      discount_name: {{ meta.discount_name | default: 'Bundle discount' | json }}
+    }
+  </script>    
+
+  <script type="text/plain" id="cpbundleBoxLineMarkup">
+    {% raw %}
+      <div class="cpbundle_boxLine">
+        <div class="cpbundle_label"><button class="cpbundle_close cpbundle_itemRemove">{% endraw %}{{ closeIcon }}{% raw %}</button><span class="cpbundle_boxItemName"></span><span class="cpbundle_boxVariantName"></span> x <span class="cpbundle_boxItemQty"></span></div>
+        <div class="cpbundle_value"><span class="cpbundle_boxItemPrice"></span><span class="cpbundle_boxItemComparePrice"></span></div>
+      </div>
+    {% endraw %}
+  </script>  
+
+  <script type="text/javascript">
+    let cpbundle = {};
+    let bundleId = document.querySelector('.cpbundle_container').getAttribute('data-id');
+
+    cpbundle.money_format = document.querySelector('.cpbundle_container').getAttribute('data-currency');
+    cpbundle.formatMoney = function(cents, format) {
+      if (typeof cents == 'string') { cents = cents.replace('.',''); }
+      var value = '';
+      var placeholderRegex = /\{\{\s*(\w+)\s*\}\}/;
+      var formatString = (format || this.money_format);
+    
+      function defaultOption(opt, def) {
+        return (typeof opt == 'undefined' ? def : opt);
+      }
+    
+      function formatWithDelimiters(number, precision, thousands, decimal) {
+        precision = defaultOption(precision, 2);
+        thousands = defaultOption(thousands, ',');
+        decimal   = defaultOption(decimal, '.');
+    
+        if (isNaN(number) || number == null) { return 0; }
+    
+        number = (number/100.0).toFixed(precision);
+    
+        var parts   = number.split('.'),
+            dollars = parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1' + thousands),
+            cents   = parts[1] ? (decimal + parts[1]) : '';
+    
+        return dollars + cents;
+      }
+    
+      switch(formatString.match(placeholderRegex)[1]) {
+        case 'amount':
+          value = formatWithDelimiters(cents, 2);
+          break;
+        case 'amount_no_decimals':
+          value = formatWithDelimiters(cents, 0);
+          break;
+        case 'amount_with_comma_separator':
+          value = formatWithDelimiters(cents, 2, '.', ',');
+          break;
+        case 'amount_no_decimals_with_comma_separator':
+          value = formatWithDelimiters(cents, 0, '.', ',');
+          break;
+      }
+    
+      return formatString.replace(placeholderRegex, value);
+    };
+
+    function setCookie(cname, cvalue, exdays) {
+      const d = new Date();
+      d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+      let expires = "expires="+d.toUTCString();
+      document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+    
+    function getCookie(cname) {
+      let name = cname + "=";
+      let ca = document.cookie.split(';');
+      for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length);
+        }
+      }
+      return "";
+    }
+
+    function isEmpty(obj) {
+      for(var prop in obj) {
+        if(Object.prototype.hasOwnProperty.call(obj, prop)) {
+          return false;
+        }
+      }
+      return JSON.stringify(obj) === JSON.stringify({});
+    }
+
+    function checkAddedQty(productId, variantId) {
+      if(getCookie('cpbundle_'+bundleId) == '') return false;
+
+      let itemStack = JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId)));
+      if(typeof itemStack[productId] == 'undefined') return false;
+      if(typeof itemStack[productId][variantId] == 'undefined') return false;
+    
+      return itemStack[productId][variantId]['quantity'];
+    }
+
+    function updateButtons() {
+      if(getCookie('cpbundle_'+bundleId) == '') return;
+
+      let itemStack = JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId)));
+      
+      for(productId in itemStack) {
+        for(variantId in itemStack[productId]) {
+          let gridButton = document.querySelector('.cpbundle_addButton[data-id="'+productId+'"]');
+          if(gridButton == null) continue;
+          let gridAction = gridButton.closest('.cpbundle_gridAction');
+          if(typeof itemStack[productId][variantId]['variant'] != 'undefined') {
+            if(variantId == gridButton.getAttribute('data-item-id')) {
+              gridAction.querySelector('.cpbundle_addedCount').innerHTML = itemStack[productId][variantId]['quantity'];
+              gridAction.classList.add('cpbundle_added');
+              break;
+            }
+          } else {
+            gridAction.querySelector('.cpbundle_addedCount').innerHTML = itemStack[productId][variantId]['quantity'];
+            gridAction.classList.add('cpbundle_added');  
+          }
+        }
+      }
+    }
+
+    function updatePricing() {
+      let boxItems = document.querySelector('.cpbundle_boxItems');
+      let minNote = document.querySelector('.cpbundle_minNote');
+      boxItems.innerHTML = "";
+      if(getCookie('cpbundle_'+bundleId) == '') {
+        document.querySelectorAll('.cpbundle_addedItemsCount').forEach(function(elem){ elem.innerHTML = 0; });
+        document.querySelector('.cpbundle_total').innerHTML = cpbundle.formatMoney(0, cpbundle.money_format);
+        document.querySelector('.cpbundle_subTotal').innerHTML = cpbundle.formatMoney(0, cpbundle.money_format);
+        document.querySelector('.cpbundle_checkoutButton').setAttribute('disabled','');
+        document.querySelector('.cpbundle_toggleBox').classList.remove('cpbundle_active');
+        if(minNote != null) minNote.classList.add('cpbundle_hide');
+        return;
+      }
+      
+      let itemStack = JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId)));
+      let boxItemsHTML = '', itemCount = 0, priceCount = 0;
+      
+      for(productId in itemStack) {
+        for(itemId in itemStack[productId]) {
+          let boxLineHTML = document.getElementById('cpbundleBoxLineMarkup').innerHTML;
+          let boxLineDoc = new DOMParser().parseFromString(boxLineHTML, "text/xml");
+          let itemTotalPrice = itemStack[productId][itemId]['quantity'] * itemStack[productId][itemId]['price'];
+          if(typeof itemStack[productId][itemId]['variant'] != 'undefined') {
+            boxLineDoc.querySelector('.cpbundle_boxVariantName').innerHTML = itemStack[productId][itemId]['variant'];
+            boxLineDoc.querySelector('.cpbundle_boxVariantName').closest('.cpbundle_label').classList.add('cpbundle_withVariant');
+          } else {
+            boxLineDoc.querySelector('.cpbundle_boxVariantName').remove();
+          }
+          boxLineDoc.querySelector('.cpbundle_boxLine').setAttribute('data-id',productId);
+          boxLineDoc.querySelector('.cpbundle_boxLine').setAttribute('data-item-id',itemId);
+          boxLineDoc.querySelector('.cpbundle_close').setAttribute('onClick','changeItem('+productId+', '+itemId+', 0)');
+          boxLineDoc.querySelector('.cpbundle_boxItemName').innerHTML = itemStack[productId][itemId]['title'];
+          boxLineDoc.querySelector('.cpbundle_boxItemQty').innerHTML = itemStack[productId][itemId]['quantity'];
+          boxLineDoc.querySelector('.cpbundle_boxItemPrice').innerHTML = cpbundle.formatMoney(itemTotalPrice, cpbundle.money_format);   
+          boxItemsHTML += boxLineDoc.querySelector('.cpbundle_boxLine').outerHTML;
+          itemCount = itemCount + itemStack[productId][itemId]['quantity'];
+          priceCount = priceCount + itemTotalPrice;
+        }
+      }
+      boxItems.innerHTML = boxItemsHTML;
+      document.querySelectorAll('.cpbundle_addedItemsCount').forEach(function(elem) { elem.innerHTML = itemCount; });
+      document.querySelector('.cpbundle_subTotal').innerHTML = cpbundle.formatMoney(priceCount, cpbundle.money_format);
+      document.querySelector('.cpbundle_toggleBox').classList.add('cpbundle_active');
+
+      let discountAmount = 0;
+      if(typeof cpbundle_settings != 'undefined') {
+        let discount = 0;
+        for(key in cpbundle_settings.discount_tiers) {
+          if(cpbundle_settings.discount_trigger == 'total_products') {
+            if(itemCount > parseInt(cpbundle_settings.discount_tiers[key]['discount_threshold'])) discount = parseInt(cpbundle_settings.discount_tiers[key]['discount']);  
+          } else if (cpbundle_settings.discount_trigger == 'total_price') {
+            if(priceCount > (parseInt(cpbundle_settings.discount_tiers[key]['discount_threshold']) * 100)) discount = parseInt(cpbundle_settings.discount_tiers[key]['discount']);  
+          }        
+        }
+        if(cpbundle_settings.discount_type == 'fixed') {
+          discountAmount = discount * 100;
+        } else {
+          discountAmount = (priceCount * discount) / 100;
+          document.querySelector('.cpbundle_discountPercent').innerHTML = ' ('+discount+'%)';
+          
+          if(discount > 0) {
+            let linePrice, lineDiscount, finalLinePrice;
+            for(productId in itemStack) {
+              for(itemId in itemStack[productId]) {
+                let boxLine = document.querySelector('.cpbundle_boxLine[data-id="'+productId+'"][data-item-id="'+itemId+'"]');
+                if(boxLine != null) {
+                  linePrice = itemStack[productId][itemId]['price'] * itemStack[productId][itemId]['quantity'];
+                  lineDiscount = (linePrice * discount) / 100;
+                  finalLinePrice = linePrice - lineDiscount;
+                  boxLine.querySelector('.cpbundle_boxItemComparePrice').innerHTML = cpbundle.formatMoney(linePrice, cpbundle.money_format);
+                  boxLine.querySelector('.cpbundle_boxItemPrice').innerHTML = cpbundle.formatMoney(finalLinePrice, cpbundle.money_format);
+                  boxLine.querySelector('.cpbundle_boxItemPrice').classList.add('cpbundle_salePrice');
+                  boxLine.querySelector('.cpbundle_boxItemPrice').setAttribute('data-reduced-amount', (lineDiscount / 100).toFixed(2));
+                }
+              }
+            } 
+          }
+        }
+
+        let minAdded;
+        if (cpbundle_settings.discount_trigger == 'total_price') {
+          if(priceCount >= (cpbundle_settings.minimum_threshold * 100)) {
+            document.querySelector('.cpbundle_checkoutButton').removeAttribute('disabled');    
+            minAdded = true;
+          } else {
+            document.querySelector('.cpbundle_checkoutButton').setAttribute('disabled', '');    
+            minAdded = false;
+          }
+        } else {
+          if(itemCount >= cpbundle_settings.minimum_threshold) {
+            document.querySelector('.cpbundle_checkoutButton').removeAttribute('disabled');    
+            minAdded = true;
+          } else {
+            document.querySelector('.cpbundle_checkoutButton').setAttribute('disabled', '');    
+            minAdded = false;
+          } 
+        }
+        if(minNote != null) {
+          if(minAdded) {
+            minNote.classList.add('cpbundle_hide');
+          } else {
+            minNote.classList.remove('cpbundle_hide');
+          } 
+        }
+      }
+
+      if(discountAmount > 0) {
+        document.querySelector('.cpbundle_discount').innerHTML = '-'+cpbundle.formatMoney(discountAmount, cpbundle.money_format);
+        document.querySelector('.cpbundle_discount').setAttribute('data',(discountAmount / 100).toFixed(2));
+        document.querySelector('.cpbundle_discountLine').classList.remove('cpbundle_hide');
+        document.querySelector('.cpbundle_saveAmount').innerHTML = cpbundle.formatMoney(discountAmount, cpbundle.money_format);
+        document.querySelector('.cpbundle_promoLine').classList.remove('cpbundle_hide');
+      } else {
+        document.querySelector('.cpbundle_discount').innerHTML = '';
+        document.querySelector('.cpbundle_discount').removeAttribute('data');
+        document.querySelector('.cpbundle_discountLine').classList.add('cpbundle_hide')
+        document.querySelector('.cpbundle_saveAmount').innerHTML = '';
+        document.querySelector('.cpbundle_promoLine').classList.add('cpbundle_hide');
+      }
+      
+      document.querySelector('.cpbundle_total').innerHTML = cpbundle.formatMoney((priceCount - discountAmount), cpbundle.money_format);
+    }
+
+    function changeItem(productId, variantId, qty) {
+      let itemStack = (getCookie('cpbundle_'+bundleId) != '') ? JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId))) : {};
+      let qtyBox = document.querySelector('.cpbundle_qtybox[data-id="'+productId+'"]');
+      let gridAction = qtyBox.closest('.cpbundle_gridAction');
+
+      if(typeof itemStack[productId] == 'undefined') return;
+      if(typeof itemStack[productId][variantId] == 'undefined') return;
+
+      if(qty == 0) {
+        delete itemStack[productId][variantId];
+        if(isEmpty(itemStack[productId])) delete itemStack[productId];
+        if(qtyBox.getAttribute('data-item-id') == variantId) gridAction.classList.remove('cpbundle_added');
+      } else {
+        itemStack[productId][variantId]['quantity'] = qty;
+      }
+      if(qtyBox.getAttribute('data-item-id') == variantId) gridAction.querySelector('.cpbundle_addedCount').innerText = qty;
+      if(isEmpty(itemStack)) {
+        setCookie('cpbundle_'+bundleId, '', 0);  
+      } else {
+        setCookie('cpbundle_'+bundleId, encodeURIComponent(JSON.stringify(itemStack)), 365);
+      }    
+      updatePricing();
+    }
+
+    function toggleBox() {
+      document.querySelector('.cpbundle_toggleBox').classList.toggle('cpbundle_boxOpened');
+      document.querySelector('.cpbundle_boxPopupSm').classList.toggle('cpbundle_active');  
+    }  
+
+    document.querySelectorAll('.cpbundle_variantOption').forEach(function(variantSelect){
+      variantSelect.addEventListener('change', function(){
+        let parent = this.closest('.cpbundle_gridInfo');
+        let variants = JSON.parse(parent.querySelector('.cpbundle_variants').innerHTML);
+        let title = [], title_str;
+        parent.querySelectorAll('.cpbundle_variantOption').forEach(function(select){
+          title.push(select.value);
+        });
+        if(title.length) {
+          title_str = title.join(' / ');
+          if(typeof variants[title_str] != 'undefined') {
+            parent.querySelector('.cpbundle_addButton').setAttribute("data-item-id", variants[title_str]['id']);
+            parent.querySelector('.cpbundle_qtybox').setAttribute("data-item-id", variants[title_str]['id']);
+            parent.querySelector('.cpbundle_gridPrice').setAttribute("data",variants[title_str]['price']);
+            parent.querySelector('.cpbundle_gridPrice').innerHTML = cpbundle.formatMoney(variants[title_str]['price'], cpbundle.money_format);
+            if(variants[title_str]['available']) {
+              parent.querySelector('.cpbundle_addButton').removeAttribute('disabled');
+              parent.querySelector('.cpbundle_addButton').classList.remove('cpbundle_soldOut');
+            } else {
+              parent.querySelector('.cpbundle_addButton').setAttribute('disabled', '');
+              parent.querySelector('.cpbundle_addButton').classList.add('cpbundle_soldOut');
+            }
+
+            let addedQty = checkAddedQty(parent.querySelector('.cpbundle_addButton').getAttribute('data-id'), variants[title_str]['id']); 
+            if(!addedQty) {
+              parent.querySelector('.cpbundle_gridAction').classList.remove('cpbundle_added');
+            } else {
+              parent.querySelector('.cpbundle_addedCount').innerHTML = addedQty;
+              parent.querySelector('.cpbundle_gridAction').classList.add('cpbundle_added');
+            }
+          } 
+        }
+      });
+    });
+    
+    document.querySelectorAll('.cpbundle_addButton').forEach(function(button){
+      button.addEventListener('click',function(){
+        if(this.disabled) return;
+        let parent = this.closest('.cpbundle_gridInfo');
+
+        let itemStack = (getCookie('cpbundle_'+bundleId) != '') ? JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId))) : {};
+        let productId = this.getAttribute('data-id')
+        let variantId = this.getAttribute('data-item-id');
+        
+        if(typeof itemStack[productId] == 'undefined') itemStack[productId] = {};
+        if(typeof itemStack[productId][variantId] == 'undefined') itemStack[productId][variantId] = {};
+        itemStack[productId][variantId] = {
+          quantity: 1,
+          title: parent.querySelector('.cpbundle_gridTitle').innerText,
+          price: parseInt(parent.querySelector('.cpbundle_gridPrice').getAttribute('data'))
+        }  
+        
+        let var_title = [];
+        parent.querySelectorAll('.cpbundle_variantOption').forEach(function(elem){
+          var_title.push(elem.value);
+        });
+        if(var_title.length) itemStack[productId][variantId]['variant'] = var_title.join(' / ');
+        
+        setCookie('cpbundle_'+bundleId, encodeURIComponent(JSON.stringify(itemStack)), 365);
+        updatePricing();
+        
+        parent.querySelector('.cpbundle_addedCount').innerHTML = 1;
+        parent.querySelector('.cpbundle_gridAction').classList.add('cpbundle_added');
+      });
+    });
+
+    document.querySelectorAll('.cpbundle_qtyBtn').forEach(function(elem){
+      elem.addEventListener('click',function(){
+        let qtyBox = this.closest('.cpbundle_qtybox');
+        let qty = parseInt(qtyBox.querySelector('.cpbundle_addedCount').innerText);
+        if(this.classList.contains('cpbundle_plus')) {
+          qty++;
+        } else {
+          qty--;
+        }
+        changeItem(qtyBox.getAttribute('data-id'), qtyBox.getAttribute('data-item-id'), qty);
+      });
+    });
+
+    let toggleBoxButton = document.querySelector('.cpbundle_toggleBox');
+    if(toggleBoxButton != null) {
+      toggleBoxButton.addEventListener('click',function(){
+        toggleBox();
+      });
+    }
+
+    let boxCloseButton = document.querySelector('.cpbundle_boxClose');
+    if(boxCloseButton != null) {
+      boxCloseButton.addEventListener('click',function(){
+        toggleBox();
+      });
+    }
+    
+    document.addEventListener("DOMContentLoaded", function(){
+      updatePricing();
+      updateButtons();
+    });
+
+    let checkoutBtn = document.querySelector('.cpbundle_checkoutButton');
+    if(checkoutBtn != null) {
+      checkoutBtn.addEventListener('click',function(){
+        let _this = this;
+        if(_this.disabled) return;
+        _this.classList.add('cpbundle_loading');
+        _this.disabled = true;
+        
+        if(getCookie('cpbundle_'+bundleId) == '') return;
+        let itemStack = JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId)));
+        let lineItems = [], counter = 0, lineElem, reducedAmount, data = {};
+        
+        for(productId in itemStack) {
+          for(variantId in itemStack[productId]) {
+            lineItems[counter] = {};
+            lineItems[counter]['variant_id'] = variantId;
+            lineItems[counter]['quantity'] = itemStack[productId][variantId]['quantity'];
+            lineItems[counter]['applied_discounts'] = [];
+
+            if (cpbundle_settings.discount_type == 'percentage') {
+              lineElem = document.querySelector('.cpbundle_boxLine[data-id="'+productId+'"][data-item-id="'+variantId+'"]');
+              reducedAmount = lineElem.querySelector('.cpbundle_boxItemPrice').getAttribute('data-reduced-amount');
+              if(lineElem != null) {
+                if(typeof reducedAmount != 'undefined' && reducedAmount != null) {
+                  lineItems[counter]['applied_discounts'][0] = {
+                    amount: Number(reducedAmount),
+                    description: cpbundle_settings.discount_name,
+                    application_type: "manual" 
+                  }
+                }
+              }
+            }
+            counter++;
+          }
+        }
+
+        data['line_items'] = lineItems;
+        
+        if (cpbundle_settings.discount_type == 'fixed') {
+          let discountElem = document.querySelector('.cpbundle_discount');
+          let discountAmount = discountElem.getAttribute('data');
+          if(typeof discountAmount != 'undefined' && discountAmount != null) {
+            data['applied_discount'] = {
+              amount: Number(discountAmount),
+              title: cpbundle_settings.discount_name,
+              value_type: "fixed_amount",
+              application_type: "manual"
+            }  
+          } 
+        }
+        
+        fetch('/apps/ca/api/order',{
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        })
+        .then((response) => response.json())
+        .then((data) => {
+          location.href = data.web_url;
+          _this.classList.remove('cpbundle_loading');
+          //_this.disabled = false;
+        })
+        .catch((error) => {
+          console.log(error);
+          _this.classList.remove('cpbundle_loading');
+          //_this.disabled = false;
+        });
+      });
+    }
+  </script>
+{% endif %}

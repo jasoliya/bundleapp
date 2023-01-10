@@ -11,7 +11,7 @@ export default function indexPage() {
     const isLargeScreen = useMedia('(min-width: 48em)');
 
     const { shop_name } = useShop();
-
+    
     const date = new Date();
     const hrs = date.getHours();
 

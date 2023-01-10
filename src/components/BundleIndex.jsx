@@ -34,9 +34,9 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
             headers: { 'Content-Type': 'application/json' }
         });
         if(response.ok) {
-            const result_bundles = await response.json();
-            navigate('/bundles');
-            parentCallback(result_bundles);
+            const result = await response.json();
+            //navigate('/bundles');
+            if(result.data) parentCallback(result.data);
         }
         setDeleting(false);
         setOpenModal(false);

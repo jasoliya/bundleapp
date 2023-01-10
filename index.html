@@ -2,11 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Codify - Bundle app</title>
+    
     <script type="module">
-      if(process.env.NODE_ENV != 'production') {
+      if (!import.meta.env || !import.meta.env.PROD) {
         const script = document.createElement('script');
         script.setAttribute('type','module');
         script.setAttribute('src', './dev_embed.js');
@@ -15,7 +15,7 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><!--app-html--></div>
     <script type="module" src="./src/main.jsx"></script>
   </body>
 </html>

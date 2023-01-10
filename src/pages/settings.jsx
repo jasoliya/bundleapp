@@ -4,7 +4,7 @@ import { useAppQuery } from "../hooks";
 
 export default function settings() {
     const {
-        data,
+        data: result,
         isLoading,
         isRefetching
     } = useAppQuery({
@@ -84,6 +84,6 @@ export default function settings() {
     }
 
     return (
-        <SettingsForm settings={data} />
+        <SettingsForm settings={result.data} />
     )
 }

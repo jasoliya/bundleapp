@@ -78,13 +78,18 @@ export function BundleForm({ Bundle: InitialBundle }) {
 
                 if (response.ok) {
                     const result = await response.json();
-                    if (!BundleId) {
-                        navigate(`/bundles/${result.handle}`);
-                        show('Bundle created', { duration: 3000 });
+                    if(result.error) {
+                        show(result.error, { duration: 3000, isError: true });
                     } else {
-                        setBundle(result);
-                        show('Bundle updated', { duration: 3000 });
+                        if (!BundleId) {
+                            navigate(`/bundles/${result.data.handle}`);
+                            show('Bundle created', { duration: 3000 });
+                        } else {
+                            setBundle(result.data);
+                            show('Bundle updated', { duration: 3000 });
+                        }
                     }
+                    
                 } else {
                     show('Internal server error', { duration: 3000, isError: true });
                 }
@@ -267,21 +272,25 @@ export function BundleForm({ Bundle: InitialBundle }) {
         if(response.ok) {
             const result = await response.json();
 
-            const formData = new FormData();
-            result.parameters.map(({name, value}) => {
-                formData.append(name, value);
-            });
-            formData.append('file', acceptedFiles[0]);
-
             try {
-                const response = await fetch(result.url, {
+                const formData = new FormData();
+                
+                if(result.error) throw new Error(result.error);
+
+                let resultData = result.data;
+                resultData.parameters.map(({name, value}) => {
+                    formData.append(name, value);
+                });
+                formData.append('file', acceptedFiles[0]);
+
+                const response = await fetch(resultData.url, {
                     method: 'POST',
                     body: formData
                 });
 
-                if(!response.ok) throw(new Error('Image could not be uploaded'));
+                if(!response.ok) throw new Error('Image could not be uploaded');
 
-                tmp_image.onChange(result.resourceUrl);
+                tmp_image.onChange(resultData.resourceUrl);
                 setPreviewImage(acceptedFiles[0]);
                 if(bundle?.image) removed_image.onChange(bundle.image.id);
             } catch(error) {

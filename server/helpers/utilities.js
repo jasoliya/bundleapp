@@ -134,26 +134,6 @@ export async function removeImage(session, removeId) {
     return data;
 }
 
-export function serialize(obj) {
-    let str = [];
-    for (var p in obj)
-        if (obj.hasOwnProperty(p)) {
-            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-        }
-    return str.join("&");
-}
-
-export async function getSession(req, res) {
-    const session = await Shopify.Utils.loadCurrentSession(req, res, false);
-    if(!session) {
-        res.status(401).send({error: "Couldn't find a Shopify session"});
-    } else {
-        return session;
-    }
-
-    return undefined;
-}
-
 export async function getBundles(session) {
     const client = new shopify.api.clients.Graphql({ session });
     let data = null;

@@ -48,7 +48,7 @@ export default function FrameContainer({ children }) {
                         label: 'Bundles',
                         icon: GiftCardMinor,
                         url: '/bundles',
-                        exactMatch: true,
+                        matchPaths: ['/bundles'],
                         onClick: () => navigate('/bundles')
                     },
                     {

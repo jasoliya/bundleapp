@@ -3,6 +3,9 @@ import { shopifyApp } from '@shopify/shopify-app-express';
 import { SQLiteSessionStorage } from '@shopify/shopify-app-session-storage-sqlite';
 import { restResources } from '@shopify/shopify-api/rest/admin/2023-01';
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 const { SHOPIFY_API_KEY, SHOPIFY_API_SECRET, SCOPES, HOST } = process.env;
 const DB_PATH = `${process.cwd()}/database.sqlite`;
 

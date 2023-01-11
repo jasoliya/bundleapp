@@ -747,7 +747,7 @@
           } 
         }
         
-        fetch('/apps/ca/api/order',{
+        fetch('/apps/ca/orderCreate',{
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -755,8 +755,9 @@
           body: JSON.stringify(data)
         })
         .then((response) => response.json())
-        .then((data) => {
-          location.href = data.web_url;
+        .then((result) => {
+          if(result.error != null) throw new Error(error);
+          if(result.data != null) location.href = result.data.web_url;
           _this.classList.remove('cpbundle_loading');
           //_this.disabled = false;
         })

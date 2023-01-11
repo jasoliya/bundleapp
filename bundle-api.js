@@ -1,3 +1,4 @@
+import { SQLiteSessionStorage } from '@shopify/shopify-app-session-storage-sqlite';
 import shopify from "../shopify.js";
 import { SHOP_QUERY, STAGED_UPLOAD, APP_META, APP_INSTALLATION, SET_METAFIELD } from "../helpers/api-query.js";
 import { getBundle, getBundleProducts, getBundles, getUploadedImage, removeBundle, removeImage, setBundle, uploadImage } from "../helpers/utilities.js";
@@ -390,6 +391,11 @@ export default function bundleApiEndpoints(app) {
             if(!shop) throw new Error('Unauthorized request');
             if(!req.body) throw new Error('Required data missing');
             
+            //const isValid = await shopify.utils;
+            //const isValid = shopify.utils.validateHmac(req.query);
+            
+            // const isValid = shopify.api.utils.validateHmac(req.query);
+
             const sessionId = shopify.api.session.getOfflineId(shop);
             const session = await shopify.config.sessionStorage.loadSession(sessionId);
 
@@ -409,7 +415,7 @@ export default function bundleApiEndpoints(app) {
             status = 500;
             error = e.message;
         }
-        
+        console.log(error);
         res.status(status).send({ success: status === 200, data, error });
     });
 }

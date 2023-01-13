@@ -97,6 +97,8 @@
 
     .cpbundle_button:disabled {opacity: 0.6; cursor: not-allowed;} 
 
+    .cpbundle_cookie_banner {position: fixed;bottom: 0;width: 100;display: none;justify-content: center;padding: 1em;background-color: #fff;border-top: 1px solid;}
+
     @media (max-width: 767px) {
       .cpbundle_boxPopupSm:not(.cpbundle_active) { visibility: hidden;transform: translateY(calc(100% + 80px)); }
       .cpbundle_boxPopupSm {position: fixed;max-width: 300px; margin-left: auto;top: auto; bottom: 78px; left: 30px; right: 30px; padding-left: 0;padding-bottom: 0;background-color: #ffffff;transform: translateY(0);transition: 0.25s ease-out;z-index: 999;}      
@@ -310,6 +312,11 @@
 
         <button class="cpbundle_button cpbundle_smUpHide cpbundle_toggleBox"><span class="cpbundle_addedItemsCount">0</span> items added <span class="cpbundle_buttonIcon">{{ upArrow }}</span></button>
       </div>  
+    </div>
+
+    <div class="cpbundle_cookie_banner">
+      <p>This page use cookies.</p>
+      <button class="cpbundle_button">Accept</button>
     </div>
   </div>
   
@@ -771,7 +778,12 @@
 
     //cookie consent api
     function initCookieBanner() {
-      console.log('customer privacy API enable');
+      const userCanBeTracked = window.Shopify.customerPrivacy.userCanBeTracked();
+      const userTrackingConsent = window.Shopify.customerPrivacy.getTrackingConsent();
+
+      if(!userCanBeTracked && userTrackingConsent === 'no_interaction') {
+        showBanner();
+      }
     }
 
     window.Shopify.loadFeatures([

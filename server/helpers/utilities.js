@@ -206,7 +206,7 @@ export async function getBundle(session, bundleId) {
     return data;
 }
 
-export async function setBundle(session, bundleId, bundle) {
+export async function setBundle(session, bundleId, bundle, action = 'add') {
     const client = new shopify.api.clients.Graphql({ session });
     let data = null;
 
@@ -224,6 +224,16 @@ export async function setBundle(session, bundleId, bundle) {
                 query: APP_INSTALLATION
             }            
         });
+
+        let params = {
+            ownerId: appInstallationId,
+            namespace: "cdapp_bundles",
+            key: `bundle_${bundleId}`,
+            value: JSON.stringify(bundle)
+        }
+
+        if(action === 'add') params['type'] = "json";
+        console.log(params);
     
         const {
             body: {
@@ -238,13 +248,7 @@ export async function setBundle(session, bundleId, bundle) {
                 query: SET_METAFIELD,
                 variables: {
                     input: [
-                        {
-                            ownerId: appInstallationId,
-                            type: "json",
-                            namespace: "cdapp_bundles",
-                            key: `bundle_${bundleId}`,
-                            value: JSON.stringify(bundle)
-                        }
+                        params
                     ]
                 }
             }

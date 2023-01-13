@@ -208,7 +208,7 @@ export default function bundleApiEndpoints(app) {
                 if(formData.description !== '<p></p>') bundle.description = formData.description;
             }
 
-            await setBundle(session, id, bundle);
+            await setBundle(session, id, bundle, 'edit');
 
             const metaProducts = await getBundleProducts(session, bundle);
 

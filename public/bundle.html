@@ -807,7 +807,7 @@
       console.log('userCanBeTracked ', userCanBeTracked);
       console.log('userTrackingConsent ', userTrackingConsent);
 
-      if(!userCanBeTracked && userTrackingConsent === 'no_interaction') {
+      if(userCanBeTracked && userTrackingConsent !== 'no_interaction') {
         showCookieBanner();
       }
     }

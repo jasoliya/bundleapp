@@ -801,6 +801,7 @@
       const userCanBeTracked = window.Shopify.customerPrivacy.userCanBeTracked();
       const userTrackingConsent = window.Shopify.customerPrivacy.getTrackingConsent();
 
+      showCookieBanner();
       if(!userCanBeTracked && userTrackingConsent === 'no_interaction') {
         showCookieBanner();
       }

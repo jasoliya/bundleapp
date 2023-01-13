@@ -394,8 +394,6 @@ export default function bundleApiEndpoints(app) {
             const sessionId = shopify.api.session.getOfflineId(shop);
             const session = await shopify.config.sessionStorage.loadSession(sessionId);
 
-            console.log(sessionId);
-
             const checkout = new shopify.api.rest.Checkout({ session });
             
             const reqData = req.body;
@@ -412,6 +410,7 @@ export default function bundleApiEndpoints(app) {
             status = 500;
             error = e.message;
         }
+        console.log(error);
         
         res.status(status).send({ success: status === 200, data, error });
     });

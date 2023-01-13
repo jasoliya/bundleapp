@@ -793,11 +793,7 @@
     }
 
     function handleCookieAccept() {
-      window.Shopify.customerPrivacy.setTrackingConsent(true, hideBanner);
-
-      document.addEventListener('trackingConsentAccepted',function() {
-        hideCookieBanner();
-      });
+      window.Shopify.customerPrivacy.setTrackingConsent(true, hideCookieBanner);
     }
 
     function initCookieBanner() {

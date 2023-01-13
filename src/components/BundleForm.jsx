@@ -17,7 +17,6 @@ import {
     Stack,
     Text,
     TextField,
-    TextStyle,
     Thumbnail
 } from "@shopify/polaris";
 import { ContextualSaveBar, Loading, ResourcePicker, useAppBridge, useNavigate, useToast } from '@shopify/app-bridge-react';
@@ -42,6 +41,7 @@ export function BundleForm({ Bundle: InitialBundle }) {
     const {show} = useToast();
     const [submitting, setSubmitting] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    //const [error]
     const [bundle, setBundle] = useState(InitialBundle);
     const [showProductPicker, setShowProductPicker] = useState(false);
     const [selectedProducts, setSelectedProducts] = useState(bundle?.products || []);
@@ -131,7 +131,8 @@ export function BundleForm({ Bundle: InitialBundle }) {
         submit,
         dirty,
         reset,
-        makeClean
+        makeClean,
+        submitErrors
     } = useForm({
         fields: {
             title: useField({
@@ -320,8 +321,8 @@ export function BundleForm({ Bundle: InitialBundle }) {
             }
         }
         if(field.discount_threshold.value !== '') filled_tiers++;
-    });
-
+    });   
+    
     return (
         <Page
             breadcrumbs={[{ content: 'bundles', url: '/bundles' }]}
@@ -336,8 +337,9 @@ export function BundleForm({ Bundle: InitialBundle }) {
             }
         >
             {loadingMarkup}
+
             <Layout>
-                <Layout.Section>    
+                <Layout.Section>
                     <ContextualSaveBar 
                         saveAction={{
                             label: "Save",
@@ -407,7 +409,7 @@ export function BundleForm({ Bundle: InitialBundle }) {
                                                 size="small"
                                             />                                                        
                                             <Stack.Item fill>
-                                                <TextStyle>{product.title}</TextStyle>
+                                                <Text>{product.title}</Text>
                                             </Stack.Item>
                                             <Button icon={CancelSmallMinor} plain onClick={() => handleRemove(product.handle)} />
                                         </Stack>
@@ -423,7 +425,7 @@ export function BundleForm({ Bundle: InitialBundle }) {
                                     {productsInput.error && (
                                         <Stack spacing="tight">
                                             <Icon source={AlertMinor} color="critical" />
-                                            <TextStyle variation="negative">{productsInput.error}</TextStyle>
+                                            <Text color="critical">{productsInput.error}</Text>
                                         </Stack>
                                     )}
                                 </Stack>

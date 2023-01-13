@@ -140,13 +140,14 @@ export default function bundleApiEndpoints(app) {
                 return node.key.replace('bundle_','');
             });
         
-            var counter = formData.id.match(/-?[0-9]$/gi);
+            var formHandle = formData.id === 'new' ? 'new-1' : formData.id;
+            var counter = formHandle.match(/-?[0-9]$/gi);
             counter = counter === null ? 0 : parseInt(counter[0].replace('-',''));
-            let handle = formData.id;
+            let handle = formHandle;
 
             while(handles.indexOf(handle) >= 0) {
                 counter++;
-                handle = formData.id.replace(/-?[0-9]$/gi, '')+'-'+counter;
+                handle = formHandle.replace(/-?[0-9]$/gi, '')+'-'+counter;
             }
             
             await setBundle(session, handle, bundle);

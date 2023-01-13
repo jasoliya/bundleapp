@@ -768,5 +768,24 @@
         });
       });
     }
+
+    //cookie consent api
+    function initCookieBanner() {
+      console.log('customer privacy API enable');
+    }
+
+    window.Shopify.loadFeatures([
+      {
+        name: 'consent-tracking-api',
+        version: '0.1'
+      }
+    ],
+    function(error) {
+      if(error) {
+        throw error;
+      }
+
+      initCookieBanner();
+    });
   </script>
 {% endif %}

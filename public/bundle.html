@@ -97,7 +97,8 @@
 
     .cpbundle_button:disabled {opacity: 0.6; cursor: not-allowed;} 
 
-    .cpbundle_cookie_banner {position: fixed; bottom: 1em; left: 1em; max-width: 300px; display: none; padding: 1em; background-color: #fff; border: 1px solid; z-index: 9999999;}
+    .cpbundle_cookie_banner {position: fixed; bottom: 1em; left: 1em; max-width: 300px; padding: 1em; background-color: #fff; border: 1px solid; z-index: 9999999;}
+    .cpbundle_cookie_banner:not(.active) {display: none;}
 
     @media (max-width: 767px) {
       .cpbundle_boxPopupSm:not(.cpbundle_active) { visibility: hidden;transform: translateY(calc(100% + 80px)); }
@@ -316,7 +317,7 @@
 
     <div class="cpbundle_cookie_banner">
       <p>We use cookies to optimise page functionality and give you best possible experience. By clicking "Accept", you consent to our use of cookies.</p>
-      <button class="cpbundle_button">Accept</button>
+      <button class="cpbundle_button" onclick="handleCookieAccept()">Accept</button>
     </div>
   </div>
   
@@ -777,12 +778,34 @@
     }
 
     //cookie consent api
+    const getCookieBanner = (function() {
+      return document.querySelector('.cpbundle_cookie_banner');
+    });
+
+    function hideCookieBanner() {
+      let cookieBanner = getCookieBanner();
+      if(cookieBanner != null) cookieBanner.classList.remove('active');
+    }
+
+    function showCookieBanner() {
+      let cookieBanner = getCookieBanner();
+      if(cookieBanner != null) cookieBanner.classList.add('active');
+    }
+
+    function handleCookieAccept() {
+      window.Shopify.customerPrivacy.setTrackingConsent(true, hideBanner);
+
+      document.addEventListener('trackingConsentAccepted',function() {
+        hideCookieBanner();
+      });
+    }
+
     function initCookieBanner() {
       const userCanBeTracked = window.Shopify.customerPrivacy.userCanBeTracked();
       const userTrackingConsent = window.Shopify.customerPrivacy.getTrackingConsent();
 
       if(!userCanBeTracked && userTrackingConsent === 'no_interaction') {
-        showBanner();
+        showCookieBanner();
       }
     }
 

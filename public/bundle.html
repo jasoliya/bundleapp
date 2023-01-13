@@ -97,7 +97,7 @@
 
     .cpbundle_button:disabled {opacity: 0.6; cursor: not-allowed;} 
 
-    .cpbundle_cookie_banner {position: fixed;bottom: 0;width: 100%;display: none;justify-content: center;padding: 1em;background-color: #fff;border-top: 1px solid;}
+    .cpbundle_cookie_banner {position: fixed; bottom: 1em; left: 1em; max-width: 300px; display: none; padding: 1em; background-color: #fff; border: 1px solid; z-index: 9999999;}
 
     @media (max-width: 767px) {
       .cpbundle_boxPopupSm:not(.cpbundle_active) { visibility: hidden;transform: translateY(calc(100% + 80px)); }
@@ -315,7 +315,7 @@
     </div>
 
     <div class="cpbundle_cookie_banner">
-      <p>This page use cookies.</p>
+      <p>We use cookies to optimise page functionality and give you best possible experience. By clicking "Accept", you consent to our use of cookies.</p>
       <button class="cpbundle_button">Accept</button>
     </div>
   </div>

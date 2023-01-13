@@ -233,8 +233,7 @@ export async function setBundle(session, bundleId, bundle, action = 'add') {
         }
 
         if(action === 'add') params['type'] = "json";
-        console.log(params);
-    
+        
         const {
             body: {
                 data: {

@@ -488,8 +488,9 @@
           boxLineDoc.querySelector('.cpbundle_close').setAttribute('onClick','changeItem('+productId+', '+itemId+', 0)');
           boxLineDoc.querySelector('.cpbundle_boxItemName').innerHTML = itemStack[productId][itemId]['title'];
           boxLineDoc.querySelector('.cpbundle_boxItemQty').innerHTML = itemStack[productId][itemId]['quantity'];
-          console.log(cpbundle.formatMoney(itemTotalPrice, cpbundle.money_format));
-          boxLineDoc.querySelector('.cpbundle_boxItemPrice').innerHTML = cpbundle.formatMoney(itemTotalPrice, cpbundle.money_format);   
+          //console.log(cpbundle.formatMoney(itemTotalPrice, cpbundle.money_format));
+          boxLineDoc.querySelector('.cpbundle_boxItemPrice').innerHTML = '<span class=money>Rs. 30.00</span>';
+          //boxLineDoc.querySelector('.cpbundle_boxItemPrice').innerHTML = cpbundle.formatMoney(itemTotalPrice, cpbundle.money_format);   
           boxItemsHTML += boxLineDoc.querySelector('.cpbundle_boxLine').outerHTML;
           itemCount = itemCount + itemStack[productId][itemId]['quantity'];
           priceCount = priceCount + itemTotalPrice;

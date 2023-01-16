@@ -64,7 +64,6 @@ if(isDev) {
     app.use(serveStatic(STATIC_PATH, { index: false }));
 
     app.use("/*", shopify.ensureInstalledOnShop(), async (req, res, next) => {
-        console.log('call');
         res
             .status(200)
             .set("Content-Type", "text/html")

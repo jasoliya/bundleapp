@@ -40,7 +40,7 @@ app.get('/bundle/:id', verifyAppProxyExtensionSignature, async (req, res) => {
         .send(readFileSync(`${process.cwd()}/public/bundle.html`));
 });
 
-app.use("/*", shopify.ensureInstalledOnShop());
+// app.use("/*", shopify.ensureInstalledOnShop());
 
 if(isDev) {
     const root = process.cwd();

@@ -412,15 +412,6 @@
       return "";
     }
 
-    function encodeHTMLEntities(text) {
-      let textArea = document.createElement('textarea');
-      textArea.innerText = text;
-      let encodedOutput=textArea.innerHTML;
-      let arr=encodedOutput.split('<br>');
-      encodedOutput=arr.join('\n');
-      return encodedOutput;
-    }
-
     function isEmpty(obj) {
       for(var prop in obj) {
         if(Object.prototype.hasOwnProperty.call(obj, prop)) {
@@ -484,7 +475,7 @@
       for(productId in itemStack) {
         for(itemId in itemStack[productId]) {
           let boxLineHTML = document.getElementById('cpbundleBoxLineMarkup').innerHTML;
-          let boxLineDoc = new DOMParser().parseFromString(boxLineHTML, "text/xml");
+          let boxLineDoc = new DOMParser().parseFromString(boxLineHTML, "text/html");
           let itemTotalPrice = itemStack[productId][itemId]['quantity'] * itemStack[productId][itemId]['price'];
           if(typeof itemStack[productId][itemId]['variant'] != 'undefined') {
             boxLineDoc.querySelector('.cpbundle_boxVariantName').innerHTML = itemStack[productId][itemId]['variant'];
@@ -497,7 +488,7 @@
           boxLineDoc.querySelector('.cpbundle_close').setAttribute('onClick','changeItem('+productId+', '+itemId+', 0)');
           boxLineDoc.querySelector('.cpbundle_boxItemName').innerHTML = itemStack[productId][itemId]['title'];
           boxLineDoc.querySelector('.cpbundle_boxItemQty').innerHTML = itemStack[productId][itemId]['quantity'];
-          boxLineDoc.querySelector('.cpbundle_boxItemPrice').innerHTML = encodeHTMLEntities(cpbundle.formatMoney(itemTotalPrice, cpbundle.money_format));   
+          boxLineDoc.querySelector('.cpbundle_boxItemPrice').innerHTML = cpbundle.formatMoney(itemTotalPrice, cpbundle.money_format);   
           boxItemsHTML += boxLineDoc.querySelector('.cpbundle_boxLine').outerHTML;
           itemCount = itemCount + itemStack[productId][itemId]['quantity'];
           priceCount = priceCount + itemTotalPrice;

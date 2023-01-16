@@ -412,6 +412,15 @@
       return "";
     }
 
+    function encodeHTMLEntities(text) {
+      let textArea = document.createElement('textarea');
+      textArea.innerText = text;
+      let encodedOutput=textArea.innerHTML;
+      let arr=encodedOutput.split('<br>');
+      encodedOutput=arr.join('\n');
+      return encodedOutput;
+    }
+
     function isEmpty(obj) {
       for(var prop in obj) {
         if(Object.prototype.hasOwnProperty.call(obj, prop)) {
@@ -488,12 +497,7 @@
           boxLineDoc.querySelector('.cpbundle_close').setAttribute('onClick','changeItem('+productId+', '+itemId+', 0)');
           boxLineDoc.querySelector('.cpbundle_boxItemName').innerHTML = itemStack[productId][itemId]['title'];
           boxLineDoc.querySelector('.cpbundle_boxItemQty').innerHTML = itemStack[productId][itemId]['quantity'];
-          
-          let xmlStr = cpbundle.formatMoney(itemTotalPrice, cpbundle.money_format);
-          let parser = new DOMParser();
-          let doc = parser.parseFromString(xmlStr, "application/xml");
-          console.log(xmlStr);
-          
+          console.log(encodeHTMLEntities(cpbundle.formatMoney(itemTotalPrice, cpbundle.money_format)));
           boxLineDoc.querySelector('.cpbundle_boxItemPrice').innerHTML = cpbundle.formatMoney(itemTotalPrice, cpbundle.money_format);   
           boxItemsHTML += boxLineDoc.querySelector('.cpbundle_boxLine').outerHTML;
           itemCount = itemCount + itemStack[productId][itemId]['quantity'];

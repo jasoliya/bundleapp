@@ -492,7 +492,7 @@
           let xmlStr = cpbundle.formatMoney(itemTotalPrice, cpbundle.money_format);
           let parser = new DOMParser();
           let doc = parser.parseFromString(xmlStr, "application/xml");
-          console.log(doc);
+          console.log(xmlStr);
           
           boxLineDoc.querySelector('.cpbundle_boxItemPrice').innerHTML = cpbundle.formatMoney(itemTotalPrice, cpbundle.money_format);   
           boxItemsHTML += boxLineDoc.querySelector('.cpbundle_boxLine').outerHTML;

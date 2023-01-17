@@ -20,7 +20,8 @@
     .cpbundle_container { color: {{ general_settings.body_color | default: '#000000' }}; text-align: left; font-size: {{ general_settings.body_font_size | default: 16 }}px; letter-spacing: normal; line-height: normal; padding-bottom: 36px; }
     .cpbundle_container p { margin: 0 0 1em; line-height: normal; }
     .cpbundle_container p:last-child { margin-bottom: 0; }
-    .cpbundle_container h1, .cpbundle_container h2 { color: {{ general_settings.primary_color | default: '#000000' }}; font-size: {{ general_settings.primary_font_size | default: 26 }}px; margin: 0 0 0.625em; letter-spacing: normal; }
+    .cpbundle_container h1 { font-size: {{ general_settings.primary_font_size | default: 26 }}px; }
+    .cpbundle_container h1, .cpbundle_container h2 { color: {{ general_settings.primary_color | default: '#000000' }}; margin: 0 0 0.625em; letter-spacing: normal; }
     .cpbundle_container h3 { font-size: {{ general_settings.secondary_font_size | default: 20 }}px; }
     .cpbundle_container h3, .cpbundle_container h4, .cpbundle_container h5, .cpbundle_container h6 { color: {{ general_settings.secondary_color | default: '#000000' }}; margin: 0 0 0.625em; letter-spacing: normal; }
     .cpbundle_container button {padding: 6px 12px !important; line-height: 1.5 !important;box-shadow: none;min-width: auto;transition: 0.25s ease;}

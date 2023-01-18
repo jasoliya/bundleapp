@@ -514,7 +514,7 @@
           discountAmount = discount * 100;
           discountAmount = Math.min(discountAmount,priceCount);
         } else {
-          console.log('discount',discount);
+          discount = Math.min(discount,100);
           discountAmount = (priceCount * discount) / 100;
           document.querySelector('.cpbundle_discountPercent').innerHTML = ' ('+discount+'%)';
           

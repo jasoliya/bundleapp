@@ -567,7 +567,7 @@ export function BundleForm({ Bundle: InitialBundle }) {
                         <div className="space-bottom-5">
                             <Stack>
                                 <Stack.Item fill>
-                                    <Text variant="headingMd" as="h2">Bundle image</Text>
+                                    <Text variant="headingMd" as="h2">Banner</Text>
                                 </Stack.Item>
 
                                 {(previewImage || (bundle?.image && !removed_image.value)) && (

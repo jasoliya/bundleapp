@@ -508,6 +508,8 @@
             if(itemCount > parseInt(cpbundle_settings.discount_tiers[key]['discount_threshold'])) discount = parseInt(cpbundle_settings.discount_tiers[key]['discount']);  
           } else if (cpbundle_settings.discount_trigger == 'total_price') {
             if(priceCount > (parseInt(cpbundle_settings.discount_tiers[key]['discount_threshold']) * 100)) discount = parseInt(cpbundle_settings.discount_tiers[key]['discount']);  
+            console.log('discount ', discount);
+            console.log('total price ', priceCount);
           }        
         }
         if(cpbundle_settings.discount_type == 'fixed') {

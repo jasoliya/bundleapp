@@ -512,10 +512,7 @@
         }
         if(cpbundle_settings.discount_type == 'fixed') {
           discountAmount = discount * 100;
-
-          console.log('discount ', discountAmount);
-          console.log('total price ', priceCount);
-
+          discountAmount = Math.min(discountAmount,priceCount);
         } else {
           discountAmount = (priceCount * discount) / 100;
           document.querySelector('.cpbundle_discountPercent').innerHTML = ' ('+discount+'%)';

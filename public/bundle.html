@@ -333,6 +333,8 @@
     }
   </script>    
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
   <script type="text/plain" id="cpbundleBoxLineMarkup">
     {% raw %}
       <div class="cpbundle_boxLine">
@@ -718,7 +720,13 @@
         
         if(getCookie('cpbundle_'+bundleId) == '') return;
         let itemStack = JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId)));
-        let lineItems = [], counter = 0, lineElem, reducedAmount, data = {};
+        let lineItems = [], counter = 0, lineElem, reducedAmount, data = {}, encrypted_data = {};
+
+        var encrypted = CryptoJS.AES.encrypt("Message", "Secret Passphrase");
+        console.log(encrypted);
+        return;
+
+        decrypted = decrypted.toString(CryptoJS.enc.Utf8);
         
         for(productId in itemStack) {
           for(variantId in itemStack[productId]) {

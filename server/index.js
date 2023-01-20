@@ -15,7 +15,7 @@ const isDev = process.env.NODE_ENV === "development";
 const STATIC_PATH = `${process.cwd()}/dist`;
 
 const app = express();
-await shopify.config.sessionStorage.deleteSession('offline_codify-app.myshopify.com');
+//await shopify.config.sessionStorage.deleteSession('offline_codify-app.myshopify.com');
 app.get(shopify.config.auth.path, shopify.auth.begin());
 app.get(
     shopify.config.auth.callbackPath,

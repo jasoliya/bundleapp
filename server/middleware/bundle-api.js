@@ -410,7 +410,7 @@ export default function bundleApiEndpoints(app) {
             status = 500;
             error = e.message;
         }
-        console.log(error);
+        
         res.status(status).send({ success: status === 200, data, error });
     });
 }

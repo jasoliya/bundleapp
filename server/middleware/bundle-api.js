@@ -2,6 +2,7 @@ import shopify from "../shopify.js";
 import { SHOP_QUERY, STAGED_UPLOAD, APP_META, APP_INSTALLATION, SET_METAFIELD } from "../helpers/api-query.js";
 import { getBundle, getBundleProducts, getBundles, getUploadedImage, removeBundle, removeImage, setBundle, uploadImage } from "../helpers/utilities.js";
 import verifyAppProxyExtensionSignature from "./verify-app-proxy-extension-signature.js";
+import crypto from 'crypto';
 
 export default function bundleApiEndpoints(app) {
     app.get('/api/dashboard', async (req, res) => {
@@ -397,13 +398,15 @@ export default function bundleApiEndpoints(app) {
             const checkout = new shopify.api.rest.Checkout({ session });
             
             const reqData = req.body;
+
+            console.log(reqData['encrypted_msg']);
             
             checkout.line_items = reqData.line_items;
             if(reqData.applied_discount) checkout.applied_discount = reqData.applied_discount;
             
-            await checkout.save({
-                update: true
-            });
+            // await checkout.save({
+            //     update: true
+            // });
 
             data = checkout;
         } catch (e) {

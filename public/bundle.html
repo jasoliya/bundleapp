@@ -720,13 +720,10 @@
         
         if(getCookie('cpbundle_'+bundleId) == '') return;
         let itemStack = JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId)));
-        let lineItems = [], counter = 0, lineElem, reducedAmount, data = {}, encrypted_data = {};
+        let lineItems = [], counter = 0, lineElem, reducedAmount, data = {};
 
-        var encrypted = CryptoJS.AES.encrypt("Message", "Secret Passphrase").toString();
-        console.log(encrypted);
-        return;
-
-        decrypted = decrypted.toString(CryptoJS.enc.Utf8);
+        var encrypted_msg = CryptoJS.AES.encrypt("Message", "cp1").toString();       
+        data['encrypted_msg'] = encrypted_msg;        
         
         for(productId in itemStack) {
           for(variantId in itemStack[productId]) {

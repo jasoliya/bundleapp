@@ -720,7 +720,7 @@
         let itemStack = JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId)));
         let lineItems = [], counter = 0, lineElem, reducedAmount, data = {};
 
-        var encrypted_msg = atob("Message");       
+        var encrypted_msg = btoa("Message");       
         data['encrypted_msg'] = encrypted_msg;        
         
         for(productId in itemStack) {

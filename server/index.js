@@ -15,7 +15,7 @@ const isDev = process.env.NODE_ENV === "development";
 const STATIC_PATH = `${process.cwd()}/dist`;
 
 const app = express();
-console.log(shopify);
+console.log(shopify.config.sessionStorage);
 app.get(shopify.config.auth.path, shopify.auth.begin());
 app.get(
     shopify.config.auth.callbackPath,

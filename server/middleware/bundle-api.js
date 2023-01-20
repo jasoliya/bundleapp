@@ -401,7 +401,7 @@ export default function bundleApiEndpoints(app) {
 
             let encryped_data = reqData['encrypted_msg'];
 
-            let decipher = crypto.createDecipheriv('aes256','cp1');
+            let decipher = crypto.createDecipher('aes256','cp1');
             let decrypted = decipher.update(encryped_data, 'hex', 'utf8') + decipher.final('utf8');
 
             console.log(decrypted);

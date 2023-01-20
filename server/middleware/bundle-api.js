@@ -401,10 +401,8 @@ export default function bundleApiEndpoints(app) {
 
             let encryped_data = reqData['encrypted_msg'];
 
-            let decipher = crypto.createDecipher('aes256','cp1');
-            let decrypted = decipher.update(encryped_data, 'hex', 'utf8');
-
-            console.log('decrypted:',decrypted);
+            let original_data = atob(encryped_data);
+            console.log(original_data);
             
             checkout.line_items = reqData.line_items;
             if(reqData.applied_discount) checkout.applied_discount = reqData.applied_discount;

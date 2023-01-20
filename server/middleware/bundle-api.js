@@ -399,7 +399,12 @@ export default function bundleApiEndpoints(app) {
             
             const reqData = req.body;
 
-            console.log(reqData['encrypted_msg']);
+            let encryped_data = reqData['encrypted_msg'];
+
+            let decipher = crypto.createDecipheriv('aes256','cp1');
+            let decrypted = decipher.update(encryped_data, 'hex', 'utf8') + decipher.final('utf8');
+
+            console.log(decrypted);
             
             checkout.line_items = reqData.line_items;
             if(reqData.applied_discount) checkout.applied_discount = reqData.applied_discount;

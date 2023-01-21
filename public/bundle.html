@@ -783,7 +783,8 @@
         generateKey.then(
           function(key){
             encrypt(message, key).then(function(data){
-              console.log(data);
+              console.log(pack(data.cipher));
+              console.log(pack(data.iv));
             })
           }
         );

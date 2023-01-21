@@ -612,6 +612,41 @@
       document.querySelector('.cpbundle_boxPopupSm').classList.toggle('cpbundle_active');  
     }  
 
+    const generateKey = async () => {
+      return window.crypto.subtle.generateKey({
+        name: 'AES-GCM',
+        length: 256,
+      }, true, ['encrypt', 'decrypt'])
+    }
+
+    const encode = (data) => {
+      const encoder = new TextEncoder()
+      return encoder.encode(data)
+    }
+
+    const generateIv = () => {
+      return window.crypto.getRandomValues(new Uint8Array(12))
+    }
+
+    const encrypt = async (data, key) => {
+      const encoded = encode(data)
+      const iv = generateIv()
+      const cipher = await window.crypto.subtle.encrypt({
+        name: 'AES-GCM',
+        iv: iv,
+      }, key, encoded)
+      return {
+        cipher,
+        iv,
+      }
+    }
+
+    const pack = (buffer) => {
+      return window.btoa(
+        String.fromCharCode.apply(null, new Uint8Array(buffer))
+      )
+    }
+
     document.querySelectorAll('.cpbundle_variantOption').forEach(function(variantSelect){
       variantSelect.addEventListener('change', function(){
         let parent = this.closest('.cpbundle_gridInfo');
@@ -722,14 +757,20 @@
         let itemStack = JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId)));
         let lineItems = [], counter = 0, lineElem, reducedAmount, data = {};
 
-        var message = "Hello from alias";   
-        var key = "bf3c199c2470cb477d907b1e0917c17b";
-        var iv  = "5183666c72eec9e4";
-        key = CryptoJS.enc.Base64.parse(key);
-        iv = CryptoJS.enc.Base64.parse(iv);
-        var cipherData = CryptoJS.AES.encrypt(message, key, { iv: iv });
+        const message = 'The message from bob';
+        const key = await generateKey();
+        const { cipher, iv } = await encrypt(message, key);
+        console.log(pack(cipher));
+        console.log(pack(iv));
+
+        // var message = "Hello from alias";   
+        // var key = "bf3c199c2470cb477d907b1e0917c17b";
+        // var iv  = "5183666c72eec9e4";
+        // key = CryptoJS.enc.Base64.parse(key);
+        // iv = CryptoJS.enc.Base64.parse(iv);
+        // var cipherData = CryptoJS.AES.encrypt(message, key, { iv: iv });
         
-        data['encrypted_data'] = cipherData.toString();
+        // data['encrypted_data'] = cipherData.toString();
 
         for(productId in itemStack) {
           for(variantId in itemStack[productId]) {

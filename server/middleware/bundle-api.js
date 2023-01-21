@@ -402,7 +402,7 @@ export default function bundleApiEndpoints(app) {
             var key = "6Le0DgMTAAAAANokdEEial";
             var iv  = "mHGFxENnZLbienLyANoi.e";
 
-            let decipher = crypto.createDecipheriv('aes-256-ocb', key, iv);
+            let decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
             let descrypted = decipher.update(reqData['encrypted_data'], 'base64');
             console.log(descrypted);    
 

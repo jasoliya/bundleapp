@@ -742,7 +742,7 @@
         let itemStack = JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId)));
         let lineItems = [], counter = 0, lineElem, reducedAmount, data = {};
 
-        const message = 'The message from bob';
+        const message = '{name: The message from bob, age: 26}';
         
         var nonce = crypto.getRandomValues(new Uint8Array(12));
         var plaintextEncoded = new TextEncoder().encode(message);

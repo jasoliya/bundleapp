@@ -405,15 +405,16 @@ export default function bundleApiEndpoints(app) {
                         
             const sessionId = shopify.api.session.getOfflineId(shop);
             const session = await shopify.config.sessionStorage.loadSession(sessionId);
-            console.log(session);
+            
             const checkout = new shopify.api.rest.Checkout({ session });
 
             checkout.line_items = reqData.line_items;
             if(reqData.applied_discount) checkout.applied_discount = reqData.applied_discount;
             
-            await checkout.save({
-                update: true
-            });
+            console.log(checkout);
+            // await checkout.save({
+            //     update: true
+            // });
 
             data = checkout;
         } catch (e) {

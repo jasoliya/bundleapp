@@ -5,6 +5,7 @@ import verifyAppProxyExtensionSignature from "./verify-app-proxy-extension-signa
 import crypto from 'crypto';
 
 const unpack = (packed) => {
+    console.log(packed);
     return Buffer.from(packed, "utf-8");
 }
 

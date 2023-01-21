@@ -417,6 +417,9 @@ export default function bundleApiEndpoints(app) {
             
             const reqData = req.body;
 
+            console.log('key ',reqData['key']);
+            console.log('iv ',reqData['iv']);
+            console.log('message ',reqData['message']);
             const decipher = crypto.createDecipheriv('aes-256-gcm', unpack(reqData['key']), unpack(reqData['iv']));
             let str = decipher.update(unpack(reqData['message']), 'base64', 'utf8');
             str += decipher.final('utf8');

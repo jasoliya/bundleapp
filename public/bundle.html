@@ -424,6 +424,26 @@
       return JSON.stringify(obj) === JSON.stringify({});
     }
 
+    function arrayBufferToBase64(buffer){
+      var binary = '';
+      var bytes = new Uint8Array(buffer);
+      var len = bytes.byteLength;
+      for (var i = 0; i < len; i++) {
+          binary += String.fromCharCode(bytes[i]);
+      }
+      return window.btoa(binary);
+    }
+
+    function base64ToArrayBuffer(base64) {
+      var binary_string = window.atob(base64);
+      var len = binary_string.length;
+      var bytes = new Uint8Array(len);
+      for (var i = 0; i < len; i++) {
+          bytes[i] = binary_string.charCodeAt(i);
+      }
+      return bytes.buffer;
+    }
+
     function checkAddedQty(productId, variantId) {
       if(getCookie('cpbundle_'+bundleId) == '') return false;
 
@@ -612,28 +632,6 @@
       document.querySelector('.cpbundle_boxPopupSm').classList.toggle('cpbundle_active');  
     }  
 
-    // https://stackoverflow.com/a/9458996/9014097
-    function arrayBufferToBase64(buffer){
-        var binary = '';
-        var bytes = new Uint8Array(buffer);
-        var len = bytes.byteLength;
-        for (var i = 0; i < len; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        return window.btoa(binary);
-    }
-
-    // https://stackoverflow.com/a/21797381/9014097
-    function base64ToArrayBuffer(base64) {
-        var binary_string = window.atob(base64);
-        var len = binary_string.length;
-        var bytes = new Uint8Array(len);
-        for (var i = 0; i < len; i++) {
-            bytes[i] = binary_string.charCodeAt(i);
-        }
-        return bytes.buffer;
-    }
-
     document.querySelectorAll('.cpbundle_variantOption').forEach(function(variantSelect){
       variantSelect.addEventListener('change', function(){
         let parent = this.closest('.cpbundle_gridInfo');
@@ -750,8 +748,13 @@
         var plaintextEncoded = new TextEncoder().encode(message);
         var aesKey = base64ToArrayBuffer('WnE0dDd3IXolQypGLUphTmRSZ1VrWHAycjV1OHgvQT8=');
         var aesCryptoKey = await crypto.subtle.importKey('raw', aesKey, 'AES-GCM', true, ['encrypt', 'decrypt']);
+
+        crypto.subtle.encrypt({name: 'AES-GCM', iv: nonce}, aesCryptoKey, plaintextEncoded).then(function(result){
+          console.log(result);
+        })
+        return;
     
-        var ciphertextTag = await crypto.subtle.encrypt({name: 'AES-GCM', iv: nonce}, aesCryptoKey, plaintextEncoded);
+        // var ciphertextTag = await crypto.subtle.encrypt({name: 'AES-GCM', iv: nonce}, aesCryptoKey, plaintextEncoded);
         
         ciphertextTag = new Uint8Array(ciphertextTag);
         
@@ -762,6 +765,8 @@
         nonceCiphertextTag = arrayBufferToBase64(nonceCiphertextTag.buffer);
 
         data['cipher'] = nonceCiphertextTag;
+
+        return;
         
         for(productId in itemStack) {
           for(variantId in itemStack[productId]) {

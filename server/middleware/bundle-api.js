@@ -405,16 +405,17 @@ export default function bundleApiEndpoints(app) {
             decipher.setAuthTag(tag); 
             let decrypted = decipher.update(ciphertext, '', 'utf8') + decipher.final('utf8');    
             let reqData = JSON.parse(decrypted);
+            console.log(reqData);
+            data = {};
+            // const checkout = new shopify.api.rest.Checkout({ session });
+            // checkout.line_items = reqData.line_items;
+            // if(reqData.applied_discount) checkout.applied_discount = reqData.applied_discount;
             
-            const checkout = new shopify.api.rest.Checkout({ session });
-            checkout.line_items = reqData.line_items;
-            if(reqData.applied_discount) checkout.applied_discount = reqData.applied_discount;
-            
-            await checkout.save({
-                update: true
-            });
+            // await checkout.save({
+            //     update: true
+            // });
 
-            data = checkout;
+            // data = checkout;
         } catch (e) {
             status = 500;
             error = e.message;

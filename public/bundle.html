@@ -612,7 +612,6 @@
       document.querySelector('.cpbundle_boxPopupSm').classList.toggle('cpbundle_active');  
     }  
 
-
     const generateKey = new Promise(function(resolve, reject){
       const key = window.crypto.subtle.generateKey({
         name: 'AES-GCM',
@@ -770,9 +769,6 @@
         generateKey.then(
           function(key){
             console.log('key ',key);
-          },
-          function(error){
-            console.log('error ',error);
           }
         );
         return;

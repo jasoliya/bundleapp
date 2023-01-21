@@ -405,7 +405,7 @@ export default function bundleApiEndpoints(app) {
             decipher.setAuthTag(tag); 
             let decrypted = decipher.update(ciphertext, '', 'utf8') + decipher.final('utf8');    
             let reqData = JSON.parse(decrypted);
-            console.log(reqData);
+            console.log(reqData.line_items);
             data = {};
             // const checkout = new shopify.api.rest.Checkout({ session });
             // checkout.line_items = reqData.line_items;

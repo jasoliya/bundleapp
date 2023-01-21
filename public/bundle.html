@@ -771,7 +771,7 @@
 
     let checkoutBtn = document.querySelector('.cpbundle_checkoutButton');
     if(checkoutBtn != null) {
-      checkoutBtn.addEventListener('click',async function(){
+      checkoutBtn.addEventListener('click',function(){
         let _this = this;
         if(_this.disabled) return;
         _this.classList.add('cpbundle_loading');
@@ -782,38 +782,36 @@
         let lineItems = [], counter = 0, lineElem, reducedAmount, data = {};
 
         const message = 'The message from bob';
-        const key = await generateKey();
-        console.log(key);
-        // generateKey.then(
-        //   function(key){
-        //     console.log(key);
-        //     encrypt(message, key).then(function(result){
-        //       data['message'] = pack(result.cipher);
-        //       data['iv'] = pack(result.iv);
+        
+        generateKey.then(
+          function(key){
+            encrypt(message, key).then(function(result){
+              data['message'] = pack(result.cipher);
+              data['iv'] = pack(result.iv);
               
-              // fetch('/apps/ca/orderCreate',{
-              //   method: 'POST',
-              //   headers: {
-              //     'Content-Type': 'application/json'
-              //   },
-              //   body: JSON.stringify(data)
-              // })
-              // .then((response) => response.json())
-              // .then((result) => {
-              //   if(result.error != null) throw new Error(error);
-              //   if(result.data != null) location.href = result.data.web_url;
-              //   _this.classList.remove('cpbundle_loading');
-              //   //_this.disabled = false;
-              // })
-              // .catch((error) => {
-              //   console.log(error);
-              //   _this.classList.remove('cpbundle_loading');
-              //   //_this.disabled = false;
-              // });
+              fetch('/apps/ca/orderCreate',{
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+              })
+              .then((response) => response.json())
+              .then((result) => {
+                if(result.error != null) throw new Error(error);
+                if(result.data != null) location.href = result.data.web_url;
+                _this.classList.remove('cpbundle_loading');
+                //_this.disabled = false;
+              })
+              .catch((error) => {
+                console.log(error);
+                _this.classList.remove('cpbundle_loading');
+                //_this.disabled = false;
+              });
 
-        //     })
-        //   }
-        // );
+            })
+          }
+        );
         
         return;
         for(productId in itemStack) {

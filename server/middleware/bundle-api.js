@@ -403,7 +403,7 @@ export default function bundleApiEndpoints(app) {
             var iv  = "5183666c72eec9e4";
 
             let decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-            let descrypted = decipher.update(reqData['encrypted_data'], 'base64');
+            let descrypted = decipher.update(reqData['encrypted_data'], 'base64', 'utf-8');
             console.log(descrypted.toString());    
 
             checkout.line_items = reqData.line_items;
@@ -418,7 +418,7 @@ export default function bundleApiEndpoints(app) {
             status = 500;
             error = e.message;
         }
-        console.log(error);
+        
         res.status(status).send({ success: status === 200, data, error });
     });
 }

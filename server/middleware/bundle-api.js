@@ -399,8 +399,8 @@ export default function bundleApiEndpoints(app) {
             
             const reqData = req.body;
             
-            var key = "6Le0DgMTAAAAANokdEEial";
-            var iv  = "mHGFxENnZLbienLyANoi.e";
+            var key = "bf3c199c2470cb477d907b1e0917c17b";
+            var iv  = "5183666c72eec9e4";
 
             let decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
             let descrypted = decipher.update(reqData['encrypted_data'], 'base64');

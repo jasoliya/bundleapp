@@ -732,7 +732,7 @@
 
     let checkoutBtn = document.querySelector('.cpbundle_checkoutButton');
     if(checkoutBtn != null) {
-      checkoutBtn.addEventListener('click',async function(){
+      checkoutBtn.addEventListener('click',function(){
         let _this = this;
         if(_this.disabled) return;
         _this.classList.add('cpbundle_loading');

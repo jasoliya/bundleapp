@@ -398,13 +398,20 @@ export default function bundleApiEndpoints(app) {
             const checkout = new shopify.api.rest.Checkout({ session });
             
             const reqData = req.body;
+            
+            var key = "6Le0DgMTAAAAANokdEEial";
+            var iv  = "mHGFxENnZLbienLyANoi.e";
+
+            let decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+            let descrypted = decipher.update(reqData['encrypted_data'], 'base64');
+            console.log(descrypted);    
 
             checkout.line_items = reqData.line_items;
             if(reqData.applied_discount) checkout.applied_discount = reqData.applied_discount;
             
-            await checkout.save({
-                update: true
-            });
+            // await checkout.save({
+            //     update: true
+            // });
 
             data = checkout;
         } catch (e) {

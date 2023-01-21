@@ -724,14 +724,13 @@
 
         var message = "Hello from alias";   
         var key = "6Le0DgMTAAAAANokdEEial";
-        var iv  = "mHGFxENnZLbienLyANoi.e";    
+        var iv  = "mHGFxENnZLbienLyANoi.e";
         key = CryptoJS.enc.Base64.parse(key);
         iv = CryptoJS.enc.Base64.parse(iv);
         var cipherData = CryptoJS.AES.encrypt(message, key, { iv: iv });
-        console.log(cipherData.toString());
-
-        return;
         
+        data['encrypted_data'] = cipherData.toString();
+
         for(productId in itemStack) {
           for(variantId in itemStack[productId]) {
             lineItems[counter] = {};

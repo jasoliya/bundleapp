@@ -617,9 +617,8 @@
         name: 'AES-GCM',
         length: 256,
       }, true, ['encrypt', 'decrypt']).then(function(data){
-        console.log(data);
-      });
-      return resolve(key);
+        resolve(key);
+      });      
     });
 
     // const generateKey = async () => {

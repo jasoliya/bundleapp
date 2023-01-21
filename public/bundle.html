@@ -747,7 +747,11 @@
         var nonce = crypto.getRandomValues(new Uint8Array(12));
         var plaintextEncoded = new TextEncoder().encode(message);
         var aesKey = base64ToArrayBuffer('WnE0dDd3IXolQypGLUphTmRSZ1VrWHAycjV1OHgvQT8=');
-        var aesCryptoKey = await crypto.subtle.importKey('raw', aesKey, 'AES-GCM', true, ['encrypt', 'decrypt']);
+        crypto.subtle.importKey('raw', aesKey, 'AES-GCM', true, ['encrypt', 'decrypt']).then(function(aesCryptoKey){
+          console.log(aesCryptoKey);
+        });
+        return;
+        // var aesCryptoKey = await crypto.subtle.importKey('raw', aesKey, 'AES-GCM', true, ['encrypt', 'decrypt']);
 
         crypto.subtle.encrypt({name: 'AES-GCM', iv: nonce}, aesCryptoKey, plaintextEncoded).then(function(result){
           console.log(result);

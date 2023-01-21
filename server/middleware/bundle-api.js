@@ -399,7 +399,7 @@ export default function bundleApiEndpoints(app) {
             
             const reqData = req.body;
 
-            const key = Buffer.from('FA5E4554812B7EE6FA619B1C87BE6', 'base64');
+            const key = Buffer.from('q3t6v9y$B&E)H@McQfTjWnZr4u7x!z%C', 'base64');
             var nonceCiphertextTag = Buffer.from(reqData['cipher'], 'base64');
             var nonce = nonceCiphertextTag.slice(0, 12);
             var ciphertext = nonceCiphertextTag.slice(12, -16);

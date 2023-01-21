@@ -406,7 +406,7 @@ export default function bundleApiEndpoints(app) {
             const key = await webcrypto.subtle.generateKey({
                 name: 'AES-GCM',
                 length: 256
-            }, true, ['decrypt']);
+            }, true, [ 'encrypt', 'decrypt']);
             
             const encoded = await webcrypto.subtle.decrypt({
                 name: 'AES-GCM',

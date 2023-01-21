@@ -636,18 +636,30 @@
       return window.crypto.getRandomValues(new Uint8Array(12))
     }
 
-    const encrypt = async (data, key) => {
-      const encoded = encode(data)
-      const iv = generateIv()
-      const cipher = await window.crypto.subtle.encrypt({
-        name: 'AES-GCM',
-        iv: iv,
-      }, key, encoded)
-      return {
-        cipher,
-        iv,
-      }
+    const encrypt = function(data, key) {
+      return new Promise(function(resolve, reject) {
+        const encoded = encode(data)
+        const iv = generateIv()
+        const cipher = window.crypto.subtle.encrypt({
+          name: 'AES-GCM',
+          iv: iv,
+        }, key, encoded)
+        resolve({cipher, iv});
+      });
     }
+
+    // const encrypt = async (data, key) => {
+    //   const encoded = encode(data)
+    //   const iv = generateIv()
+    //   const cipher = await window.crypto.subtle.encrypt({
+    //     name: 'AES-GCM',
+    //     iv: iv,
+    //   }, key, encoded)
+    //   return {
+    //     cipher,
+    //     iv,
+    //   }
+    // }
 
     const pack = (buffer) => {
       return window.btoa(
@@ -768,7 +780,9 @@
         const message = 'The message from bob';
         generateKey.then(
           function(key){
-            console.log('key ',key);
+            encrypt(message, key).then(function(data){
+              console.log(data);
+            })
           }
         );
         return;

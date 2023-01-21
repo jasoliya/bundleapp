@@ -748,27 +748,18 @@
         var plaintextEncoded = new TextEncoder().encode(message);
         var aesKey = base64ToArrayBuffer('WnE0dDd3IXolQypGLUphTmRSZ1VrWHAycjV1OHgvQT8=');
         crypto.subtle.importKey('raw', aesKey, 'AES-GCM', true, ['encrypt', 'decrypt']).then(function(aesCryptoKey){
-          console.log(aesCryptoKey);
+          crypto.subtle.encrypt({name: 'AES-GCM', iv: nonce}, aesCryptoKey, plaintextEncoded).then(function(ciphertextTag){
+            ciphertextTag = new Uint8Array(ciphertextTag);
+            var nonceCiphertextTag = new Uint8Array(nonce.length + ciphertextTag.length);
+            nonceCiphertextTag.set(nonce);
+            nonceCiphertextTag.set(ciphertextTag, nonce.length);
+            
+            nonceCiphertextTag = arrayBufferToBase64(nonceCiphertextTag.buffer);
+
+            data['cipher'] = nonceCiphertextTag;
+            console.log(nonceCiphertextTag);
+          });
         });
-        return;
-        // var aesCryptoKey = await crypto.subtle.importKey('raw', aesKey, 'AES-GCM', true, ['encrypt', 'decrypt']);
-
-        crypto.subtle.encrypt({name: 'AES-GCM', iv: nonce}, aesCryptoKey, plaintextEncoded).then(function(result){
-          console.log(result);
-        })
-        return;
-    
-        // var ciphertextTag = await crypto.subtle.encrypt({name: 'AES-GCM', iv: nonce}, aesCryptoKey, plaintextEncoded);
-        
-        ciphertextTag = new Uint8Array(ciphertextTag);
-        
-        var nonceCiphertextTag = new Uint8Array(nonce.length + ciphertextTag.length);
-        nonceCiphertextTag.set(nonce);
-        nonceCiphertextTag.set(ciphertextTag, nonce.length);
-        
-        nonceCiphertextTag = arrayBufferToBase64(nonceCiphertextTag.buffer);
-
-        data['cipher'] = nonceCiphertextTag;
 
         return;
         

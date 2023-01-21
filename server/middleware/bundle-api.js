@@ -403,8 +403,9 @@ export default function bundleApiEndpoints(app) {
             var iv  = "5183666c72eec9e4";
 
             let decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-            let descrypted = decipher.update(reqData['encrypted_data'], 'base64', 'utf-8');
-            console.log(descrypted.toString());    
+            let decrypted = decipher.update(reqData['encrypted_data'], 'base64', 'utf8');
+            decrypted = decrypted + decipher.final('utf8');
+            console.log(decrypted);    
 
             checkout.line_items = reqData.line_items;
             if(reqData.applied_discount) checkout.applied_discount = reqData.applied_discount;

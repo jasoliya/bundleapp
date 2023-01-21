@@ -5,13 +5,7 @@ import verifyAppProxyExtensionSignature from "./verify-app-proxy-extension-signa
 import crypto from 'crypto';
 
 const unpack = (packed) => {
-    const string = atob(packed)
-    const buffer = new ArrayBuffer(string.length)
-    const bufferView = new Uint8Array(buffer)
-    for (let i = 0; i < string.length; i++) {
-        bufferView[i] = string.charCodeAt(i)
-    }
-    return buffer
+    return Buffer.from(packed, "utf-8");
 }
 
 const decode = (bytestream) => {

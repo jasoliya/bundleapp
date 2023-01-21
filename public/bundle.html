@@ -612,61 +612,26 @@
       document.querySelector('.cpbundle_boxPopupSm').classList.toggle('cpbundle_active');  
     }  
 
-    const generateKey = new Promise(function(resolve, reject){
-      const key = window.crypto.subtle.generateKey({
-        name: 'AES-GCM',
-        length: 256,
-      }, true, ['encrypt', 'decrypt']);
-      return resolve(key);
-    });
-
-    // const generateKey = async () => {
-    //   return window.crypto.subtle.generateKey({
-    //     name: 'AES-GCM',
-    //     length: 256,
-    //   }, true, ['encrypt', 'decrypt'])
-    // }
-
-    const encode = (data) => {
-      const encoder = new TextEncoder()
-      return encoder.encode(data)
+    // https://stackoverflow.com/a/9458996/9014097
+    function arrayBufferToBase64(buffer){
+        var binary = '';
+        var bytes = new Uint8Array(buffer);
+        var len = bytes.byteLength;
+        for (var i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary);
     }
 
-    const generateIv = () => {
-      return window.crypto.getRandomValues(new Uint8Array(12))
-    }
-
-    const encrypt = function(data, key) {
-      return new Promise(function(resolve, reject) {
-        const encoded = encode(data);
-        const iv = generateIv();
-
-        const cipher = window.crypto.subtle.encrypt({
-          name: 'AES-GCM',
-          iv: iv,
-        }, key, encoded).then(function(data){
-          resolve({cipher: data, iv});
-        });        
-      });
-    }
-
-    // const encrypt = async (data, key) => {
-    //   const encoded = encode(data)
-    //   const iv = generateIv()
-    //   const cipher = await window.crypto.subtle.encrypt({
-    //     name: 'AES-GCM',
-    //     iv: iv,
-    //   }, key, encoded)
-    //   return {
-    //     cipher,
-    //     iv,
-    //   }
-    // }
-
-    const pack = (buffer) => {
-      return window.btoa(
-        String.fromCharCode.apply(null, new Uint8Array(buffer))
-      )
+    // https://stackoverflow.com/a/21797381/9014097
+    function base64ToArrayBuffer(base64) {
+        var binary_string = window.atob(base64);
+        var len = binary_string.length;
+        var bytes = new Uint8Array(len);
+        for (var i = 0; i < len; i++) {
+            bytes[i] = binary_string.charCodeAt(i);
+        }
+        return bytes.buffer;
     }
 
     document.querySelectorAll('.cpbundle_variantOption').forEach(function(variantSelect){
@@ -769,7 +734,7 @@
 
     let checkoutBtn = document.querySelector('.cpbundle_checkoutButton');
     if(checkoutBtn != null) {
-      checkoutBtn.addEventListener('click',function(){
+      checkoutBtn.addEventListener('click',async function(){
         let _this = this;
         if(_this.disabled) return;
         _this.classList.add('cpbundle_loading');
@@ -781,35 +746,20 @@
 
         const message = 'The message from bob';
         
-        generateKey.then(
-          function(key){
-            encrypt(message, key).then(function(result){
-              data['message'] = pack(result.cipher);
-              data['iv'] = pack(result.iv);
-              
-              fetch('/apps/ca/orderCreate',{
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-              })
-              .then((response) => response.json())
-              .then((result) => {
-                if(result.error != null) throw new Error(error);
-                if(result.data != null) location.href = result.data.web_url;
-                _this.classList.remove('cpbundle_loading');
-                //_this.disabled = false;
-              })
-              .catch((error) => {
-                console.log(error);
-                _this.classList.remove('cpbundle_loading');
-                //_this.disabled = false;
-              });
-
-            })
-          }
-        );
+        var nonce = crypto.getRandomValues(new Uint8Array(12));
+        var plaintextEncoded = new TextEncoder().encode(message);
+        var asKey = base64ToArrayBuffer('a068Sk+PXECrysAIN+fEGDzMQ3xlpWgE1bWXHVLb0AQ=');
+        var aesCryptoKey = await crypto.subtle.importKey('raw', aesKey, 'AES-GCM', true, ['encrypt', 'decrypt']);
+    
+        var ciphertextTag = await crypto.subtle.encrypt({name: 'AES-GCM', iv: nonce}, aesCryptoKey, plaintextEncoded);
+        ciphertextTag = new Uint8Array(ciphertextTag);
+        
+        var nonceCiphertextTag = new Uint8Array(nonce.length + ciphertextTag.length);
+        nonceCiphertextTag.set(nonce);
+        nonceCiphertextTag.set(ciphertextTag, nonce.length);
+        
+        nonceCiphertextTag = arrayBufferToBase64(nonceCiphertextTag.buffer);
+        console.log(nonceCiphertextTag);
         
         return;
         for(productId in itemStack) {

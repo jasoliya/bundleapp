@@ -411,10 +411,9 @@ export default function bundleApiEndpoints(app) {
             checkout.line_items = reqData.line_items;
             if(reqData.applied_discount) checkout.applied_discount = reqData.applied_discount;
             
-            console.log(decrypted);
-            // await checkout.save({
-            //     update: true
-            // });
+            await checkout.save({
+                update: true
+            });
 
             data = checkout;
         } catch (e) {

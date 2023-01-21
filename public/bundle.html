@@ -638,12 +638,15 @@
 
     const encrypt = function(data, key) {
       return new Promise(function(resolve, reject) {
-        const encoded = encode(data)
-        const iv = generateIv()
+        const encoded = encode(data);
+        const iv = generateIv();
+
         const cipher = window.crypto.subtle.encrypt({
           name: 'AES-GCM',
           iv: iv,
-        }, key, encoded)
+        }, key, encoded).then(function(data){
+          console.log('data ',data);
+        });
         resolve({cipher, iv});
       });
     }

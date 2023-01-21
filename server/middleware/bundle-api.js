@@ -395,8 +395,6 @@ export default function bundleApiEndpoints(app) {
             const sessionId = shopify.api.session.getOfflineId(shop);
             const session = await shopify.config.sessionStorage.loadSession(sessionId);
 
-            const checkout = new shopify.api.rest.Checkout({ session });
-            
             const key = Buffer.from('WnE0dDd3IXolQypGLUphTmRSZ1VrWHAycjV1OHgvQT8=', 'base64');
             let nonceCiphertextTag = Buffer.from(req.body.data, 'base64');
             let nonce = nonceCiphertextTag.slice(0, 12);
@@ -408,6 +406,7 @@ export default function bundleApiEndpoints(app) {
             let decrypted = decipher.update(ciphertext, '', 'utf8') + decipher.final('utf8');    
             let reqData = JSON.parse(decrypted);
             
+            const checkout = new shopify.api.rest.Checkout({ session });
             checkout.line_items = reqData.line_items;
             if(reqData.applied_discount) checkout.applied_discount = reqData.applied_discount;
             

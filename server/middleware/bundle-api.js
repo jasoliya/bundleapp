@@ -397,36 +397,25 @@ export default function bundleApiEndpoints(app) {
 
             const checkout = new shopify.api.rest.Checkout({ session });
             
-            const reqData = req.body;
-
             const key = Buffer.from('WnE0dDd3IXolQypGLUphTmRSZ1VrWHAycjV1OHgvQT8=', 'base64');
-            var nonceCiphertextTag = Buffer.from(reqData['data'], 'base64');
-            var nonce = nonceCiphertextTag.slice(0, 12);
-            var ciphertext = nonceCiphertextTag.slice(12, -16);
-            var tag = nonceCiphertextTag.slice(-16);  // Separate tag!
+            let nonceCiphertextTag = Buffer.from(req.body.data, 'base64');
+            let nonce = nonceCiphertextTag.slice(0, 12);
+            let ciphertext = nonceCiphertextTag.slice(12, -16);
+            let tag = nonceCiphertextTag.slice(-16);
          
-            var decipher = crypto.createDecipheriv('aes-256-gcm', key, nonce); 
-            decipher.setAuthTag(tag); // Set tag!
-            var decrypted = decipher.update(ciphertext, '', 'utf8') + decipher.final('utf8');    
-            console.log(decrypted);
+            let decipher = crypto.createDecipheriv('aes-256-gcm', key, nonce); 
+            decipher.setAuthTag(tag); 
+            let decrypted = decipher.update(ciphertext, '', 'utf8') + decipher.final('utf8');    
+            let reqData = JSON.parse(decrypted);
             
-            // var key = "bf3c199c2470cb477d907b1e0917c17b";
-            // var iv  = "5183666c72eec9e4";
-
-            // let decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-            // let decrypted = decipher.update(reqData['encrypted_data'], 'base64', 'utf8');
-            // decrypted = decrypted + decipher.final('utf8');
-            // console.log(decrypted);    
-
             checkout.line_items = reqData.line_items;
             if(reqData.applied_discount) checkout.applied_discount = reqData.applied_discount;
             
-            // await checkout.save({
-            //     update: true
-            // });
+            await checkout.save({
+                update: true
+            });
 
-            data = {};
-            //data = checkout;
+            data = checkout;
         } catch (e) {
             status = 500;
             error = e.message;

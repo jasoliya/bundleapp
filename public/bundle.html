@@ -612,12 +612,20 @@
       document.querySelector('.cpbundle_boxPopupSm').classList.toggle('cpbundle_active');  
     }  
 
-    const generateKey = async () => {
+
+    const generateKey = new Promise(function(resolve, reject){
       return window.crypto.subtle.generateKey({
         name: 'AES-GCM',
         length: 256,
-      }, true, ['encrypt', 'decrypt'])
-    }
+      }, true, ['encrypt', 'decrypt']) 
+    });
+
+    // const generateKey = async () => {
+    //   return window.crypto.subtle.generateKey({
+    //     name: 'AES-GCM',
+    //     length: 256,
+    //   }, true, ['encrypt', 'decrypt'])
+    // }
 
     const encode = (data) => {
       const encoder = new TextEncoder()
@@ -758,10 +766,18 @@
         let lineItems = [], counter = 0, lineElem, reducedAmount, data = {};
 
         const message = 'The message from bob';
-        const key = await generateKey();
-        const { cipher, iv } = await encrypt(message, key);
-        console.log(pack(cipher));
-        console.log(pack(iv));
+        generateKey.then(
+          function(key){
+            console.log('key ',key);
+          },
+          function(error){
+            console.log('error ',error);
+          }
+        );
+        
+        // const { cipher, iv } = await encrypt(message, key);
+        // console.log(pack(cipher));
+        // console.log(pack(iv));
 
         // var message = "Hello from alias";   
         // var key = "bf3c199c2470cb477d907b1e0917c17b";

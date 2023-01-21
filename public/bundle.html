@@ -742,46 +742,6 @@
         let itemStack = JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId)));
         let lineItems = [], counter = 0, lineElem, reducedAmount, data = {};
 
-        const message = '{name: The message from bob, age: 26}';
-        
-        var nonce = crypto.getRandomValues(new Uint8Array(12));
-        var plaintextEncoded = new TextEncoder().encode(message);
-        var aesKey = base64ToArrayBuffer('WnE0dDd3IXolQypGLUphTmRSZ1VrWHAycjV1OHgvQT8=');
-        crypto.subtle.importKey('raw', aesKey, 'AES-GCM', true, ['encrypt', 'decrypt']).then(function(aesCryptoKey){
-          crypto.subtle.encrypt({name: 'AES-GCM', iv: nonce}, aesCryptoKey, plaintextEncoded).then(function(ciphertextTag){
-            ciphertextTag = new Uint8Array(ciphertextTag);
-            var nonceCiphertextTag = new Uint8Array(nonce.length + ciphertextTag.length);
-            nonceCiphertextTag.set(nonce);
-            nonceCiphertextTag.set(ciphertextTag, nonce.length);
-            
-            nonceCiphertextTag = arrayBufferToBase64(nonceCiphertextTag.buffer);
-
-            data['cipher'] = nonceCiphertextTag;
-            
-            fetch('/apps/ca/orderCreate',{
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(data)
-            })
-            .then((response) => response.json())
-            .then((result) => {
-              if(result.error != null) throw new Error(error);
-              if(result.data != null) location.href = result.data.web_url;
-              _this.classList.remove('cpbundle_loading');
-              //_this.disabled = false;
-            })
-            .catch((error) => {
-              console.log(error);
-              _this.classList.remove('cpbundle_loading');
-              //_this.disabled = false;
-            });
-          });
-        });
-
-        return;
-        
         for(productId in itemStack) {
           for(variantId in itemStack[productId]) {
             lineItems[counter] = {};
@@ -821,24 +781,42 @@
           } 
         }
         
-        fetch('/apps/ca/orderCreate',{
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
-        })
-        .then((response) => response.json())
-        .then((result) => {
-          if(result.error != null) throw new Error(error);
-          if(result.data != null) location.href = result.data.web_url;
-          _this.classList.remove('cpbundle_loading');
-          //_this.disabled = false;
-        })
-        .catch((error) => {
-          console.log(error);
-          _this.classList.remove('cpbundle_loading');
-          //_this.disabled = false;
+        var nonce = crypto.getRandomValues(new Uint8Array(12));
+        var plaintextEncoded = new TextEncoder().encode(JSON.stringify(data));
+        var aesKey = base64ToArrayBuffer('WnE0dDd3IXolQypGLUphTmRSZ1VrWHAycjV1OHgvQT8=');
+        crypto.subtle.importKey('raw', aesKey, 'AES-GCM', true, ['encrypt', 'decrypt']).then(function(aesCryptoKey){
+          crypto.subtle.encrypt({name: 'AES-GCM', iv: nonce}, aesCryptoKey, plaintextEncoded).then(function(ciphertextTag){
+            ciphertextTag = new Uint8Array(ciphertextTag);
+            var nonceCiphertextTag = new Uint8Array(nonce.length + ciphertextTag.length);
+            nonceCiphertextTag.set(nonce);
+            nonceCiphertextTag.set(ciphertextTag, nonce.length);
+            
+            nonceCiphertextTag = arrayBufferToBase64(nonceCiphertextTag.buffer);
+            
+            console.log(nonceCiphertextTag);
+            return;
+            fetch('/apps/ca/orderCreate',{
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+
+              })
+            })
+            .then((response) => response.json())
+            .then((result) => {
+              if(result.error != null) throw new Error(error);
+              if(result.data != null) location.href = result.data.web_url;
+              _this.classList.remove('cpbundle_loading');
+              //_this.disabled = false;
+            })
+            .catch((error) => {
+              console.log(error);
+              _this.classList.remove('cpbundle_loading');
+              //_this.disabled = false;
+            });
+          });
         });
       });
     }

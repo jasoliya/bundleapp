@@ -399,17 +399,12 @@ export default function bundleApiEndpoints(app) {
             
             const reqData = req.body;
 
-            let encryped_data = reqData['encrypted_msg'];
-
-            let original_data = atob(encryped_data);
-            console.log(original_data);
-            
             checkout.line_items = reqData.line_items;
             if(reqData.applied_discount) checkout.applied_discount = reqData.applied_discount;
             
-            // await checkout.save({
-            //     update: true
-            // });
+            await checkout.save({
+                update: true
+            });
 
             data = checkout;
         } catch (e) {

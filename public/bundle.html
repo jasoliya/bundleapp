@@ -342,6 +342,8 @@
     {% endraw %}
   </script>  
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
   <script type="text/javascript">
     let cpbundle = {};
     let bundleId = document.querySelector('.cpbundle_container').getAttribute('data-id');
@@ -720,8 +722,15 @@
         let itemStack = JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId)));
         let lineItems = [], counter = 0, lineElem, reducedAmount, data = {};
 
-        var encrypted_msg = btoa("Message");       
-        data['encrypted_msg'] = encrypted_msg;        
+        var message = "Hello from alias";   
+        var key = "6Le0DgMTAAAAANokdEEial";
+        var iv  = "mHGFxENnZLbienLyANoi.e";    
+        key = CryptoJS.enc.Base64.parse(key);
+        iv = CryptoJS.enc.Base64.parse(iv);
+        var cipherData = CryptoJS.AES.encrypt(message, key, { iv: iv });
+        console.log(cipherData);
+
+        return;
         
         for(productId in itemStack) {
           for(variantId in itemStack[productId]) {

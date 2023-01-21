@@ -2,7 +2,7 @@ import shopify from "../shopify.js";
 import { SHOP_QUERY, STAGED_UPLOAD, APP_META, APP_INSTALLATION, SET_METAFIELD } from "../helpers/api-query.js";
 import { getBundle, getBundleProducts, getBundles, getUploadedImage, removeBundle, removeImage, setBundle, uploadImage } from "../helpers/utilities.js";
 import verifyAppProxyExtensionSignature from "./verify-app-proxy-extension-signature.js";
-import { webcrypto } from 'crypto';
+import crypto from 'crypto';
 
 export default function bundleApiEndpoints(app) {
     app.get('/api/dashboard', async (req, res) => {

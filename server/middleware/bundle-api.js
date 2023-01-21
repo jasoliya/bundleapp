@@ -400,7 +400,7 @@ export default function bundleApiEndpoints(app) {
             const reqData = req.body;
 
             const key = Buffer.from('WnE0dDd3IXolQypGLUphTmRSZ1VrWHAycjV1OHgvQT8=', 'base64');
-            var nonceCiphertextTag = Buffer.from(reqData['cipher'], 'base64');
+            var nonceCiphertextTag = Buffer.from(reqData, 'base64');
             var nonce = nonceCiphertextTag.slice(0, 12);
             var ciphertext = nonceCiphertextTag.slice(12, -16);
             var tag = nonceCiphertextTag.slice(-16);  // Separate tag!
@@ -425,7 +425,8 @@ export default function bundleApiEndpoints(app) {
             //     update: true
             // });
 
-            data = checkout;
+            data = {};
+            //data = checkout;
         } catch (e) {
             status = 500;
             error = e.message;

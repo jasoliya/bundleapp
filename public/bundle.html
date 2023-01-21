@@ -793,15 +793,13 @@
             
             nonceCiphertextTag = arrayBufferToBase64(nonceCiphertextTag.buffer);
             
-            console.log(nonceCiphertextTag);
-            return;
             fetch('/apps/ca/orderCreate',{
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-
+                data: nonceCiphertextTag
               })
             })
             .then((response) => response.json())

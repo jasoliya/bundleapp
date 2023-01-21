@@ -782,9 +782,9 @@
         const message = 'The message from bob';
         generateKey.then(
           function(key){
+            data['key'] = pack(key);
             encrypt(message, key).then(function(data){
               data['message'] = pack(data.cipher);
-              data['key'] = pack(key);
               data['iv'] = pack(data.iv);
               console.log(data);
             })

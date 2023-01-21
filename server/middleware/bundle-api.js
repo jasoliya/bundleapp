@@ -2,24 +2,10 @@ import shopify from "../shopify.js";
 import { SHOP_QUERY, STAGED_UPLOAD, APP_META, APP_INSTALLATION, SET_METAFIELD } from "../helpers/api-query.js";
 import { getBundle, getBundleProducts, getBundles, getUploadedImage, removeBundle, removeImage, setBundle, uploadImage } from "../helpers/utilities.js";
 import verifyAppProxyExtensionSignature from "./verify-app-proxy-extension-signature.js";
-import crypto from 'crypto';
+import { webcrypto } from 'crypto';
 
 const unpack = (packed) => {
-    console.log(packed);
     return Buffer.from(packed, "utf-8");
-}
-
-const decode = (bytestream) => {
-    const decoder = new TextDecoder();
-    return decoder.decode(bytestream)
-}
-
-const decrypt = async (cipher, key, iv) => {
-    const encoded = await window.crypto.subtle.decrypt({
-        name: 'AES-GCM',
-        iv: iv,
-    }, key, cipher)
-    return decode(encoded)
 }
 
 export default function bundleApiEndpoints(app) {
@@ -417,11 +403,11 @@ export default function bundleApiEndpoints(app) {
             
             const reqData = req.body;
 
-            const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.alloc(32), unpack(reqData['iv']));
-            let str = decipher.update(unpack(reqData['message']), 'base64', 'utf8');
-            str += decipher.final('utf8');
-            
-            console.log('str ',str);
+            const key = await webcrypto.subtle.generateKey({
+                name: 'AES-GCM',
+                length: 256
+            }, true, ['decrypt']);
+            console.log(key);
             
             // var key = "bf3c199c2470cb477d907b1e0917c17b";
             // var iv  = "5183666c72eec9e4";

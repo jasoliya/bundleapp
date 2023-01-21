@@ -407,7 +407,13 @@ export default function bundleApiEndpoints(app) {
                 name: 'AES-GCM',
                 length: 256
             }, true, ['decrypt']);
-            console.log(key);
+            
+            const encoded = await webcrypto.subtle.decrypt({
+                name: 'AES-GCM',
+                iv: unpack(reqData['iv'])
+            }, key, unpack(reqData['message']));
+
+            console.log(encoded);
             
             // var key = "bf3c199c2470cb477d907b1e0917c17b";
             // var iv  = "5183666c72eec9e4";

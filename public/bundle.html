@@ -783,25 +783,13 @@
         generateKey.then(
           function(key){
             encrypt(message, key).then(function(data){
-              console.log(pack(data.cipher));
-              console.log(pack(data.iv));
+              data['message'] = pack(data.cipher);
+              data['key'] = pack(key);
+              data['iv'] = pack(data.iv);
             })
           }
         );
-        return;
-        // const { cipher, iv } = await encrypt(message, key);
-        // console.log(pack(cipher));
-        // console.log(pack(iv));
-
-        // var message = "Hello from alias";   
-        // var key = "bf3c199c2470cb477d907b1e0917c17b";
-        // var iv  = "5183666c72eec9e4";
-        // key = CryptoJS.enc.Base64.parse(key);
-        // iv = CryptoJS.enc.Base64.parse(iv);
-        // var cipherData = CryptoJS.AES.encrypt(message, key, { iv: iv });
         
-        // data['encrypted_data'] = cipherData.toString();
-
         for(productId in itemStack) {
           for(variantId in itemStack[productId]) {
             lineItems[counter] = {};

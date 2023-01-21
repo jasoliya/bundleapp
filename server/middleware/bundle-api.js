@@ -4,6 +4,29 @@ import { getBundle, getBundleProducts, getBundles, getUploadedImage, removeBundl
 import verifyAppProxyExtensionSignature from "./verify-app-proxy-extension-signature.js";
 import crypto from 'crypto';
 
+const unpack = (packed) => {
+    const string = window.atob(packed)
+    const buffer = new ArrayBuffer(string.length)
+    const bufferView = new Uint8Array(buffer)
+    for (let i = 0; i < string.length; i++) {
+        bufferView[i] = string.charCodeAt(i)
+    }
+    return buffer
+}
+
+const decode = (bytestream) => {
+    const decoder = new TextDecoder();
+    return decoder.decode(bytestream)
+}
+
+const decrypt = async (cipher, key, iv) => {
+    const encoded = await window.crypto.subtle.decrypt({
+        name: 'AES-GCM',
+        iv: iv,
+    }, key, cipher)
+    return decode(encoded)
+}
+
 export default function bundleApiEndpoints(app) {
     app.get('/api/dashboard', async (req, res) => {
         let status = 200, error = null, data = null;
@@ -398,6 +421,12 @@ export default function bundleApiEndpoints(app) {
             const checkout = new shopify.api.rest.Checkout({ session });
             
             const reqData = req.body;
+
+            const decipher = crypto.createDecipheriv('aes-256-gcm', unpack(reqData['key']), unpack(reqData['iv']));
+            let str = decipher.update(unpack(reqData['message']), 'base64', 'utf8');
+            str += decipher.final('utf8');
+            
+            console.log('str ',str);
             
             // var key = "bf3c199c2470cb477d907b1e0917c17b";
             // var iv  = "5183666c72eec9e4";

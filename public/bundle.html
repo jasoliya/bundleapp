@@ -782,11 +782,30 @@
         const message = 'The message from bob';
         generateKey.then(
           function(key){
-            console.log('key ', key);
             encrypt(message, key).then(function(result){
               data['message'] = pack(result.cipher);
               data['iv'] = pack(result.iv);
-              console.log(data);
+              
+              fetch('/apps/ca/orderCreate',{
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+              })
+              .then((response) => response.json())
+              .then((result) => {
+                if(result.error != null) throw new Error(error);
+                if(result.data != null) location.href = result.data.web_url;
+                _this.classList.remove('cpbundle_loading');
+                //_this.disabled = false;
+              })
+              .catch((error) => {
+                console.log(error);
+                _this.classList.remove('cpbundle_loading');
+                //_this.disabled = false;
+              });
+
             })
           }
         );

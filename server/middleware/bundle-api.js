@@ -401,14 +401,14 @@ export default function bundleApiEndpoints(app) {
 
             const key = Buffer.from('a068Sk+PXECrysAIN+fEGDzMQ3xlpWgE1bWXHVLb0AQ=', 'base64');
             var nonceCiphertextTag = Buffer.from(reqData['cipher'], 'base64');
-            console.log(reqData['cipher']);
-            // var nonce = nonceCiphertextTag.slice(0, 12);
-            // var ciphertext = nonceCiphertextTag.slice(12, -16);
-            // var tag = nonceCiphertextTag.slice(-16);  // Separate tag!
+            var nonce = nonceCiphertextTag.slice(0, 12);
+            var ciphertext = nonceCiphertextTag.slice(12, -16);
+            var tag = nonceCiphertextTag.slice(-16);  // Separate tag!
          
-            // var decipher = crypto.createDecipheriv('aes-256-gcm', key, nonce); 
-            // decipher.setAuthTag(tag); // Set tag!
-            // var decrypted = decipher.update(ciphertext, '', 'utf8') + decipher.final('utf8');    
+            var decipher = crypto.createDecipheriv('aes-256-gcm', key, nonce); 
+            decipher.setAuthTag(tag); // Set tag!
+            var decrypted = decipher.update(ciphertext, '', 'utf8') + decipher.final('utf8');    
+            console.log(decrypted);
             
             // var key = "bf3c199c2470cb477d907b1e0917c17b";
             // var iv  = "5183666c72eec9e4";

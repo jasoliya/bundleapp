@@ -759,9 +759,9 @@
         nonceCiphertextTag.set(ciphertextTag, nonce.length);
         
         nonceCiphertextTag = arrayBufferToBase64(nonceCiphertextTag.buffer);
-        console.log(nonceCiphertextTag);
+
+        data['cipher'] = nonceCiphertextTag;
         
-        return;
         for(productId in itemStack) {
           for(variantId in itemStack[productId]) {
             lineItems[counter] = {};

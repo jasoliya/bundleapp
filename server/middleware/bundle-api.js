@@ -4,10 +4,6 @@ import { getBundle, getBundleProducts, getBundles, getUploadedImage, removeBundl
 import verifyAppProxyExtensionSignature from "./verify-app-proxy-extension-signature.js";
 import { webcrypto } from 'crypto';
 
-const unpack = (packed) => {
-    return Buffer.from(packed, "utf-8");
-}
-
 export default function bundleApiEndpoints(app) {
     app.get('/api/dashboard', async (req, res) => {
         let status = 200, error = null, data = null;
@@ -403,17 +399,16 @@ export default function bundleApiEndpoints(app) {
             
             const reqData = req.body;
 
-            const key = await webcrypto.subtle.generateKey({
-                name: 'AES-GCM',
-                length: 256
-            }, true, [ 'encrypt', 'decrypt']);
-            
-            const encoded = await webcrypto.subtle.decrypt({
-                name: 'AES-GCM',
-                iv: unpack(reqData['iv'])
-            }, key, unpack(reqData['message']));
-
-            console.log(encoded);
+            const key = Buffer.from('a068Sk+PXECrysAIN+fEGDzMQ3xlpWgE1bWXHVLb0AQ=', 'base64');
+            var nonceCiphertextTag = Buffer.from(reqData['cipher'], 'base64');
+            console.log(nonceCiphertextTag);
+            // var nonce = nonceCiphertextTag.slice(0, 12);
+            // var ciphertext = nonceCiphertextTag.slice(12, -16);
+            // var tag = nonceCiphertextTag.slice(-16);  // Separate tag!
+         
+            // var decipher = crypto.createDecipheriv('aes-256-gcm', key, nonce); 
+            // decipher.setAuthTag(tag); // Set tag!
+            // var decrypted = decipher.update(ciphertext, '', 'utf8') + decipher.final('utf8');    
             
             // var key = "bf3c199c2470cb477d907b1e0917c17b";
             // var iv  = "5183666c72eec9e4";

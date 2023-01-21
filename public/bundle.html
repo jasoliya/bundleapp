@@ -645,9 +645,8 @@
           name: 'AES-GCM',
           iv: iv,
         }, key, encoded).then(function(data){
-          console.log('data ',data);
-        });
-        resolve({cipher, iv});
+          resolve({cipher: data, iv});
+        });        
       });
     }
 

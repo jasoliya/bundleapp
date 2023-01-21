@@ -748,12 +748,11 @@
         
         var nonce = crypto.getRandomValues(new Uint8Array(12));
         var plaintextEncoded = new TextEncoder().encode(message);
-        var aesKey = base64ToArrayBuffer('a068Sk+PXECrysAIN+fEGDzMQ3xlpWgE1bWXHVLb0AQ=');
+        var aesKey = base64ToArrayBuffer('cp1');
         var aesCryptoKey = await crypto.subtle.importKey('raw', aesKey, 'AES-GCM', true, ['encrypt', 'decrypt']);
     
         var ciphertextTag = await crypto.subtle.encrypt({name: 'AES-GCM', iv: nonce}, aesCryptoKey, plaintextEncoded);
-        console.log(ciphertextTag);
-        return;
+        
         ciphertextTag = new Uint8Array(ciphertextTag);
         
         var nonceCiphertextTag = new Uint8Array(nonce.length + ciphertextTag.length);

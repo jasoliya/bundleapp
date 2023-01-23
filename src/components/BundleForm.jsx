@@ -326,7 +326,7 @@ export function BundleForm({ Bundle: InitialBundle }) {
     return (
         <Page
             breadcrumbs={[{ content: 'bundles', url: '/bundles' }]}
-            title={bundle?.title ? bundle.title : 'New bundle'}
+            title={bundle?.title ? bundle.title : 'New page'}
             primaryAction={bundle?.id ?
                 <Button
                     icon={ViewMinor}

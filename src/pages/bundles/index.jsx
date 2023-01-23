@@ -57,16 +57,16 @@ export default function HomePage() {
             <Page>
                 <Card sectioned>
                     <EmptyState
-                        heading='Create your bundle'
+                        heading='Create a bundle page'
                         action={{
-                            content: 'Create bundle',
+                            content: 'Create page',
                             onAction: () => {
                                 navigate('/bundles/new')
                             }
                         }}
                         image={emptyImage}
                     >
-                        <p>Create your bundle and offer best deals to customer.</p>
+                        <p>Create your bundle page and offer the best deals to customers.</p>
                     </EmptyState>
                 </Card>
             </Page>
@@ -77,7 +77,7 @@ export default function HomePage() {
         <Page
             title='Bundles'
             primaryAction={{
-                content: 'Create bundle',
+                content: 'Create page',
                 disabled: bundles.length >= 10,
                 onAction: () => navigate('/bundles/new')
             }}
@@ -85,10 +85,10 @@ export default function HomePage() {
             <Stack vertical spacing='loose'>
                 {bundles.length >= 10 && (
                     <Banner
-                        title='Bundle limit reached'
+                        title='Bundle page limit reached'
                         status='warning'
                     >
-                        <p>You can create a maximum of 10 bundles. Remove unused bundle to add more.</p>
+                        <p>You can create a maximum of 10 bundle pages. Remove the unused page to add more.</p>
                     </Banner>
                 )}
                 {bundlesMarkup}

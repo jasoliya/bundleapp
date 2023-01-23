@@ -73,19 +73,19 @@ export default function indexPage() {
                                     <li>
                                         <button className={activeTab === 1 ? 'selected' : ''} onClick={() => setActiveTab(1)}>
                                             <span className="tabCount">1</span>
-                                            <span className="tabText">Create bundle</span>
+                                            <span className="tabText">Create page</span>
                                         </button>
                                     </li>
                                     <li>
                                         <button className={activeTab === 2 ? 'selected' : ''} onClick={() => setActiveTab(2)}>
                                             <span className="tabCount">2</span>
-                                            <span className="tabText">Customize bundle</span>
+                                            <span className="tabText">Personalize settings</span>
                                         </button>
                                     </li>
                                     <li>
                                         <button className={activeTab === 3 ? 'selected' : ''} onClick={() => setActiveTab(3)}>
                                             <span className="tabCount">3</span>
-                                            <span className="tabText">Preview bundle</span>
+                                            <span className="tabText">Preview page</span>
                                         </button>
                                     </li>
                                     <li>
@@ -99,29 +99,29 @@ export default function indexPage() {
                             <div className="contentPanel">
                                 <div className={`tabContent${activeTab === 1 ? ' active' : ''}`}>
                                     <Stack vertical>
-                                        <Text variant="headingMd" as="h5">Create a bundle easily</Text>
-                                        <Text>Create your bundle by filling in all necessary fields in the form.</Text>
-                                        <Button primary onClick={() => navigate('/bundles/new')}>Create bundle</Button>
+                                        <Text variant="headingMd" as="h5">Make a page quickly.</Text>
+                                        <Text>Build your page by filling out the form with all the required fields, including the products, discounts, and content.</Text>
+                                        <Button primary onClick={() => navigate('/bundles/new')}>Create</Button>
                                     </Stack>
                                 </div>
                                 <div className={`tabContent${activeTab === 2 ? ' active' : ''}`}>
                                     <Stack vertical>
-                                        <Text variant="headingMd" as="h5">Customize appearance</Text>
-                                        <Text>Customize the style and layout of the bundle page as per your requirements.</Text>
-                                        <Button primary onClick={() => navigate('/settings')}>Customize</Button>
+                                        <Text variant="headingMd" as="h5">Personalize the design and content.</Text>
+                                        <Text>Customize the style, layout, and content of the bundle page as per your requirements.</Text>
+                                        <Button primary onClick={() => navigate('/settings')}>Settings</Button>
                                     </Stack>
                                 </div>
                                 <div className={`tabContent${activeTab === 3 ? ' active' : ''}`}>
                                     <Stack vertical>
-                                        <Text variant="headingMd" as="h5">Check the preview</Text>
+                                        <Text variant="headingMd" as="h5">Examine the preview.</Text>
                                         <Text>Check the preview of your bundle page before adding a link to your storefront.</Text>
                                         <Button primary onClick={() => navigate('/bundles')}>Preview</Button>
                                     </Stack>
                                 </div>
                                 <div className={`tabContent${activeTab === 4 ? ' active' : ''}`}>
                                     <Stack vertical>
-                                        <Text variant="headingMd" as="h5">Add a link to navigation</Text>
-                                        <Text>Finally, After checking the preview, If everything meets your requirements, Add a link of the bundle page to a suitable place in your storefront.</Text>
+                                        <Text variant="headingMd" as="h5">Add a link to the navigation.</Text>
+                                        <Text>Finally, after checking the preview, if everything meets your requirements, add a link of the bundle page to a suitable place in your storefront.</Text>
                                     </Stack>
                                 </div>
                             </div>

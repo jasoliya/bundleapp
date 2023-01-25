@@ -806,7 +806,7 @@
             .then((response) => response.json())
             .then((result) => {
               if(result.error != null) throw new Error(error);
-              if(result.data != null) //location.href = result.data.web_url;
+              if(result.data != null) location.href = result.data.web_url;
               _this.classList.remove('cpbundle_loading');
               //_this.disabled = false;
             })

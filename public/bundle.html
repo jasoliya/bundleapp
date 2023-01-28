@@ -733,8 +733,7 @@
     let checkoutBtn = document.querySelector('.cpbundle_checkoutButton');
     if(checkoutBtn != null) {
       document.querySelector('body').addEventListener("unload", function(){
-        console.log('unload');
-        //this.disabled = false;
+        checkoutBtn.disabled = false;
       });
       checkoutBtn.addEventListener('click',function(){
         let _this = this;

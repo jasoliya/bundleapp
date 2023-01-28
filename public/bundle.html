@@ -150,7 +150,7 @@
       .cpbundle_gridItem { width: calc(100% / {{ general_settings.grid_size_desktop | default: '3' }}); }
 
       .cpbundle_banner { position: relative; padding-top: 30%; }
-      .cpbundle_banner img { position: absolute; top: 0; left: 0; right: 0; bottom: 0; max-width: 100%; max-height: 100%; margin: auto; }
+      .cpbundle_banner img { position: absolute; top: 0; left: 0; right: 0; bottom: 0; width: 100%; object-fit:cover; height: 100%; margin: auto; }
     }
 
     {{ general_settings.custom_css }}

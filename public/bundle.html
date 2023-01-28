@@ -730,12 +730,11 @@
       updateButtons();
     });
 
-    document.querySelector('.cpbundle_checkoutButton').addEventListener("unload", function(){
-      console.log('unload');
-    });
-
     let checkoutBtn = document.querySelector('.cpbundle_checkoutButton');
     if(checkoutBtn != null) {
+      checkoutBtn.addEventListener("unload", function(){
+        this.disabled = false;
+      });
       checkoutBtn.addEventListener('click',function(){
         let _this = this;
         if(_this.disabled) return;

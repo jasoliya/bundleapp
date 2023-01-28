@@ -732,6 +732,10 @@
 
     let checkoutBtn = document.querySelector('.cpbundle_checkoutButton');
     if(checkoutBtn != null) {
+      document.querySelector('body').addEventListener('beforeunload', function(){
+        console.log('unload');
+      });
+
       checkoutBtn.addEventListener('click',function(){
         let _this = this;
 

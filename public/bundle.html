@@ -730,18 +730,18 @@
       updateButtons();
     });
 
-    let checkoutBtn = document.querySelector('.cpbundle_checkoutButton'), isLoading = false;
+    document.querySelector('.cpbundle_checkoutButton').addEventListener("unload", function(){
+      console.log('unload');
+    });
+
+    let checkoutBtn = document.querySelector('.cpbundle_checkoutButton');
     if(checkoutBtn != null) {
       checkoutBtn.addEventListener('click',function(){
         let _this = this;
-        console.log(isLoading);
-        if(isLoading) return;
         if(_this.disabled) return;
-        
         _this.classList.add('cpbundle_loading');
         _this.disabled = true;
-        isLoading = true;
-
+        
         if(getCookie('cpbundle_'+bundleId) == '') return;
         let itemStack = JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId)));
         let lineItems = [], counter = 0, lineElem, reducedAmount, data = {};
@@ -812,12 +812,12 @@
               if(result.error != null) throw new Error(error);
               if(result.data != null) location.href = result.data.web_url;
               _this.classList.remove('cpbundle_loading');
-              _this.disabled = false;
+              //_this.disabled = false;
             })
             .catch((error) => {
               console.log(error);
               _this.classList.remove('cpbundle_loading');
-              _this.disabled = false;
+              //_this.disabled = false;
             });
           });
         });

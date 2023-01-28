@@ -730,14 +730,14 @@
       updateButtons();
     });
 
-    let checkoutBtn = document.querySelector('.cpbundle_checkoutButton');
+    let checkoutBtn = document.querySelector('.cpbundle_checkoutButton'), apiResponse;
     if(checkoutBtn != null) {
       checkoutBtn.addEventListener('click',function(){
         let _this = this;
         if(_this.disabled) return;
         _this.classList.add('cpbundle_loading');
         _this.disabled = true;
-        
+        console.log(apiResponse);
         if(getCookie('cpbundle_'+bundleId) == '') return;
         let itemStack = JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId)));
         let lineItems = [], counter = 0, lineElem, reducedAmount, data = {};
@@ -807,6 +807,7 @@
             .then((result) => {
               if(result.error != null) throw new Error(error);
               if(result.data != null) location.href = result.data.web_url;
+              apiResponse = result;
               _this.classList.remove('cpbundle_loading');
               _this.disabled = false;
             })

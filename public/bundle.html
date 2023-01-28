@@ -734,10 +734,13 @@
     if(checkoutBtn != null) {
       checkoutBtn.addEventListener('click',function(){
         let _this = this;
+
         if(_this.disabled) return;
+        if(typeof apiResponse != 'undefined') return;
+        
         _this.classList.add('cpbundle_loading');
         _this.disabled = true;
-        console.log(apiResponse);
+        
         if(getCookie('cpbundle_'+bundleId) == '') return;
         let itemStack = JSON.parse(decodeURIComponent(getCookie('cpbundle_'+bundleId)));
         let lineItems = [], counter = 0, lineElem, reducedAmount, data = {};

@@ -622,7 +622,7 @@
       if(isEmpty(itemStack)) {
         setCookie('cpbundle_'+bundleId, '', 0);  
       } else {
-        setCookie('cpbundle_'+bundleId, encodeURIComponent(JSON.stringify(itemStack)), 365);
+        setCookie('cpbundle_'+bundleId, encodeURIComponent(JSON.stringify(itemStack)), 7);
       }    
       updatePricing();
     }
@@ -690,7 +690,7 @@
         });
         if(var_title.length) itemStack[productId][variantId]['variant'] = var_title.join(' / ');
         
-        setCookie('cpbundle_'+bundleId, encodeURIComponent(JSON.stringify(itemStack)), 365);
+        setCookie('cpbundle_'+bundleId, encodeURIComponent(JSON.stringify(itemStack)), 7);
         updatePricing();
         
         parent.querySelector('.cpbundle_addedCount').innerHTML = 1;

@@ -30,6 +30,7 @@ export default function bundleApiEndpoints(app) {
             error = e.message;
         }
 
+        res.cookie('cpbundle_app', 'noode cookie');
         res.status(status).send({ success: status === 200, data, error });
     });
 

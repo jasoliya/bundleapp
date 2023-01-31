@@ -1,6 +1,7 @@
 import { join } from 'path';
 import { readFileSync } from 'fs';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import serveStatic from 'serve-static';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -15,6 +16,7 @@ const isDev = process.env.NODE_ENV === "development";
 const STATIC_PATH = `${process.cwd()}/dist`;
 
 const app = express();
+app.use(cookieParser());
 //await shopify.config.sessionStorage.deleteSession('offline_codify-app.myshopify.com');
 app.get(shopify.config.auth.path, shopify.auth.begin());
 app.get(

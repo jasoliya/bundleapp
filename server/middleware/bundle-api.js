@@ -15,7 +15,8 @@ export default function bundleApiEndpoints(app) {
                 body: {
                     data: {
                         shop: {
-                            name
+                            name,
+                            url
                         }
                     }
                 }
@@ -24,7 +25,7 @@ export default function bundleApiEndpoints(app) {
                     query: SHOP_QUERY
                 }
             });
-            data = { shop_name: name }
+            data = { shop_name: name, shop_url: url }
         } catch(e) {
             status = 500;
             error = e.message;

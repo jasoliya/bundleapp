@@ -1,15 +1,16 @@
-import { useAppBridge, useNavigate, useToast } from "@shopify/app-bridge-react";
-import { Badge, Button, ButtonGroup, Card, IndexTable, Link, Modal, Text, Tooltip } from "@shopify/polaris";
+import { useNavigate, useToast } from "@shopify/app-bridge-react";
+import { Button, ButtonGroup, Card, IndexTable, Link, Modal, Text, Tooltip } from "@shopify/polaris";
 import { EditMinor, DeleteMinor, ViewMinor } from '@shopify/polaris-icons';
 import { useCallback } from "react";
 import { useState } from "react";
 import { useAuthenticatedFetch } from "../hooks";
+import { useShop } from "./providers/ShopProvider";
 
 export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
     const navigate = useNavigate();
     const fetch = useAuthenticatedFetch();
     const {show} = useToast();
-    const { hostOrigin } = useAppBridge();
+    const { shop_url } = useShop();
     const [ openModal, setOpenModal ] = useState(false);
     const [ deleteId, setDeleteId ] = useState();
     const [ deleting, setDeleting ] = useState(false);
@@ -17,7 +18,7 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
     const resourceName = {
         singular: 'bundle',
         plural: 'bundles',
-    };
+    };   
 
     const toggleModal = useCallback(() => setOpenModal(!openModal), [openModal]);
 
@@ -80,7 +81,7 @@ export function BundleIndex({ bundleList: bundles, loading, parentCallback }) {
                         </Tooltip>
                         <Tooltip content="Preview" dismissOnMouseOut preferredPosition="above">
                             <Button
-                                onClick={() => window.open(`${hostOrigin}/apps/ca/bundle/${id}`, '_blank').focus()}
+                                onClick={() => window.open(`${shop_url}/apps/ca/bundle/${id}`, '_blank').focus()}
                                 disabled={deleting}
                                 icon={ViewMinor}
                                 accessibilityLabel="View bundle"

@@ -19,13 +19,14 @@ import {
     TextField,
     Thumbnail
 } from "@shopify/polaris";
-import { ContextualSaveBar, Loading, ResourcePicker, useAppBridge, useNavigate, useToast } from '@shopify/app-bridge-react';
+import { ContextualSaveBar, Loading, ResourcePicker, useNavigate, useToast } from '@shopify/app-bridge-react';
 import { useCallback, useState } from "react";
 import { useForm, useField, notEmptyString, useDynamicList } from '@shopify/react-form';
 import { imageURL } from '../helper';
 import { CancelSmallMinor, NoteMinor, ImageMajor, AlertMinor, DeleteMinor, ViewMinor } from '@shopify/polaris-icons';
 import { useAuthenticatedFetch } from '../hooks';
 import { TextEditor } from "./TextEditor";
+import { useShop } from "./providers/ShopProvider";
 
 const convertProductsToString = (products) => {
     return products.map((product) => {
@@ -37,7 +38,7 @@ const convertProductsToString = (products) => {
 export function BundleForm({ Bundle: InitialBundle }) {
     const fetch = useAuthenticatedFetch();
     const navigate = useNavigate();
-    const {hostOrigin} = useAppBridge();
+    const { shop_url } = useShop();
     const {show} = useToast();
     const [submitting, setSubmitting] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -330,7 +331,7 @@ export function BundleForm({ Bundle: InitialBundle }) {
             primaryAction={bundle?.id ?
                 <Button
                     icon={ViewMinor}
-                    url={`${hostOrigin}/apps/ca/bundle/${bundle.id}`}
+                    url={`${shop_url}/apps/ca/bundle/${bundle.id}`}
                     external
                 >Preview</Button>
                 : null
@@ -554,9 +555,9 @@ export function BundleForm({ Bundle: InitialBundle }) {
                         <Card sectioned>
                             <TextField
                                 label="Page URL"
-                                value={`${hostOrigin}/apps/ca/bundle/${bundle.id}`}
+                                value={`${shop_url}/apps/ca/bundle/${bundle.id}`}
                                 disabled={true}
-                                connectedRight={<Button primary onClick={() => { navigator.clipboard.writeText(`${hostOrigin}/apps/ca/bundle/${bundle.id}`); show('Copied to clipboard', { duration: 3000 }); }}>Copy link</Button>}
+                                connectedRight={<Button primary onClick={() => { navigator.clipboard.writeText(`${shop_url}/apps/ca/bundle/${bundle.id}`); show('Copied to clipboard', { duration: 3000 }); }}>Copy link</Button>}
                             />                                                            
                         </Card>
                     )}

@@ -2,6 +2,7 @@ export const SHOP_QUERY = `
     query {
         shop {
             name,
+            url,
             currencyCode
         }
     }

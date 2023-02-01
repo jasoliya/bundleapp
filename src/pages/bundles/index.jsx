@@ -8,7 +8,7 @@ import {
     Stack
 } from '@shopify/polaris';
 import { Loading, useNavigate } from '@shopify/app-bridge-react';
-import emptyImage from '../../assets/empty-bundles.png';
+import placeholderImage from '../../assets/bundle-page-placeholder.png';
 import { useAppQuery } from '../../hooks';
 import { BundleIndex } from '../../components';
 import { useState } from 'react';
@@ -64,7 +64,7 @@ export default function HomePage() {
                                 navigate('/bundles/new')
                             }
                         }}
-                        image={emptyImage}
+                        image={placeholderImage}
                     >
                         <p>Create your bundle page and offer the best deals to customers.</p>
                     </EmptyState>

@@ -818,6 +818,7 @@
                   for(qty in result.error['line_items']) {
                     result.error['line_items'][qty]['quantity'].forEach(function(errorLine, index, arr){
                       msg += errorLine['message'];
+                      console.log(index, (arr.length - 1));
                       if(index < (arr.length - 1)) msg += '\n';
                     });
                   }

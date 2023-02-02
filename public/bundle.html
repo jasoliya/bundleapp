@@ -33,7 +33,7 @@
     .cpbundle_container .cpbundle_button.cpbundle_loading .cpbundle_btnText {display: none;}
     .cpbundle_container .cpbundle_button:not(.cpbundle_loading) .cpbundle_btnLoader {display: none;}
     .cpbundle_container .cpbundle_button .cpbundle_btnLoader svg { width: 24px; height: 24px; margin: 0 auto; }
-    .cpbundle_container .cpbundle_errorMsg {margin-top: 8px;font-size: 14px;color: #ff3333;}
+    .cpbundle_container .cpbundle_errorMsg {margin-top: 8px;margin-bottom: 0;font-size: 14px;color: #ff3333;}
   
     .cpbundle_grid { margin-left: -{{ general_settings.grid_x_spacing | default: 24 }}px; margin-bottom: -{{ general_settings.grid_y_spacing | default: 24 }}px; }
     .cpbundle_gridItem { width: calc(100% / {{ general_settings.grid_size_mobile | default: '1' }}); }

@@ -820,7 +820,11 @@
             .catch((error) => {
               if(alertMsg != null) {
                 alertMsg.classList.remove('cpbundle_hide');
-                alertMsg.innerText = error;
+                if(typeof error['line_items']) {
+
+                } else {
+                  alertMsg.innerText = error;
+                }
               }
               _this.classList.remove('cpbundle_loading');
               //_this.disabled = false;

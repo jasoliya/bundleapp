@@ -418,7 +418,6 @@ export default function bundleApiEndpoints(app) {
 
             data = checkout;
         } catch (e) {
-            console.log(e);
             status = 500;
             error = e.response.body.errors;
         }

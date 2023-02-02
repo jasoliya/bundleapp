@@ -813,9 +813,12 @@
             .then((response) => response.json())
             .then((result) => {
               if(result.error != null) {
-                console.log(typeof result.error);
-                if(typeof result.error['line_items'] != 'undefined') {
-                  throw new Error('Some items from your bundle are running out of stock.');
+                if(typeof result.error == 'object') {
+                  if(typeof result.error['line_items'] != 'undefined') {
+                    throw new Error('Some items from your bundle are running out of stock.');
+                  } else {
+                    throw new Error('Something went wrong.');
+                  }
                 } else {
                   throw new Error(result.error);
                 }

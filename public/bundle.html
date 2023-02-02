@@ -33,7 +33,7 @@
     .cpbundle_container .cpbundle_button.cpbundle_loading .cpbundle_btnText {display: none;}
     .cpbundle_container .cpbundle_button:not(.cpbundle_loading) .cpbundle_btnLoader {display: none;}
     .cpbundle_container .cpbundle_button .cpbundle_btnLoader svg { width: 24px; height: 24px; margin: 0 auto; }
-    .cpbundle_container .cpbundle_note {margin-top: 8px;font-size: 14px;}
+    .cpbundle_container .cpbundle_errorMsg {margin-top: 8px;font-size: 14px;color: #ff3333;}
   
     .cpbundle_grid { margin-left: -{{ general_settings.grid_x_spacing | default: 24 }}px; margin-bottom: -{{ general_settings.grid_y_spacing | default: 24 }}px; }
     .cpbundle_gridItem { width: calc(100% / {{ general_settings.grid_size_mobile | default: '1' }}); }
@@ -92,7 +92,6 @@
     .cpbundle_container .cpbundle_toggleBox { color: {{ general_settings.button_hover_text_color | default: '#ffffff' }}; background-color: {{ general_settings.button_hover_back_color | default: '#000000' }};position: fixed; bottom: 20px; left: 20px; right: 20px;z-index: 999; }  
     .cpbundle_toggleBox .cpbundle_buttonIcon { display: inline-block; margin-left: 4px; color: inherit;transition: 0.25s ease; }
     .cpbundle_toggleBox.cpbundle_boxOpened .cpbundle_buttonIcon {transform: rotate(180deg);}
-    .cpbundle_container .cpbundle_minNote {color: #ff3333;}
     
     .cpbundle_hide {display: none !important;}
 
@@ -297,7 +296,7 @@
                 </button>
               </div>
               {% if meta.minimum_threshold > 0 %}
-                <p class="cpbundle_note cpbundle_minNote cpbundle_hide">
+                <p class="cpbundle_minNote cpbundle_errorMsg cpbundle_hide">
                   {% assign discount_trigger = meta.discount_trigger | default: 'total_products' %}
                   {% capture amount %}
                     {% assign amount_required = meta.minimum_threshold %}

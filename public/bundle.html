@@ -638,9 +638,9 @@
         parent.querySelectorAll('.cpbundle_variantOption').forEach(function(select){
           title.push(select.value);
         });
-        console.log(title_str);
         if(title.length) {
           title_str = title.join(' / ');
+          console.log(title_str);
           if(typeof variants[title_str] != 'undefined') {
             parent.querySelector('.cpbundle_addButton').setAttribute("data-item-id", variants[title_str]['id']);
             parent.querySelector('.cpbundle_qtybox').setAttribute("data-item-id", variants[title_str]['id']);

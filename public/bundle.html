@@ -638,7 +638,7 @@
         parent.querySelectorAll('.cpbundle_variantOption').forEach(function(select){
           title.push(select.value);
         });
-        console.log(variants);
+        console.log(title_str);
         if(title.length) {
           title_str = title.join(' / ');
           if(typeof variants[title_str] != 'undefined') {

@@ -815,7 +815,7 @@
               if(result.error != null) {
                 if(typeof result.error['line_items'] != 'undefined') {
                   for(qty in result.error['line_items']) {
-                    console.log(qty);
+                    console.log(result.error['line_items'][qty]);
                     // console.log(result.error['line_items'][qty]['quantity']['message']);
                   }
                   return;

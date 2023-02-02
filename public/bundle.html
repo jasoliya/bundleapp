@@ -814,11 +814,13 @@
             .then((result) => {
               if(result.error != null) {
                 if(typeof result.error['line_items'] != 'undefined') {
+                  let msg = '';
                   for(qty in result.error['line_items']) {
-                    console.log(result.error['line_items'][qty]);
-                    // console.log(result.error['line_items'][qty]['quantity']['message']);
+                    result.error['line_items'][qty]['quantity'].forEach(function(errorLine, index){
+                      msg += errorLine['message'];
+                    });
                   }
-                  return;
+                  throw new Error(msg);
                 } else {
                   throw new Error(result.error);
                 }

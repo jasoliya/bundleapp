@@ -55,7 +55,7 @@
     .cpbundle_gridInfo .cpbundle_addButton.cpbundle_soldOut .cpbundle_btnText {display: none;}
     .cpbundle_gridInfo .cpbundle_addButton:not(.cpbundle_soldOut) .cpbundle_btnSoldOutText {display: none;}
     
-    .cpbundle_qtybox {display: flex;align-items: center;font-size: {{ general_settings.button_font_size | default: 16 }}px;border-radius: {{ general_settings.button_corner_radius | default: 4 }}px;line-height: 1.5;color: {{ general_settings.button_hover_text_color | default: '#ffffff' }};padding: 6px 10px;border: 1px solid {{ general_settings.button_text_color | default: '#000000' }};background-color: {{ general_settings.button_hover_back_color | default: '#000000' }}; }
+    .cpbundle_qtybox {display: flex;align-items: center;font-size: 16px;border-radius: {{ general_settings.button_corner_radius | default: 4 }}px;line-height: 1.5;color: {{ general_settings.button_hover_text_color | default: '#ffffff' }};padding: 6px 10px;border: 1px solid {{ general_settings.button_text_color | default: '#000000' }};background-color: {{ general_settings.button_hover_back_color | default: '#000000' }}; }
     .cpbundle_qtybox button {background-color: transparent;border: none;padding: 4px 6px;color: inherit;}
     .cpbundle_qtybox .cpbundle_qty {flex: 1 1 auto;text-align: center}
 
@@ -121,6 +121,7 @@
       .cpbundle_width {padding: 0 30px; }
   
       .cpbundle_gridItem { width: calc(100% / 3); }
+      .cpbundle_qtybox { font-size: {{ general_settings.button_font_size | default: 16 }}px; }
 
       .cpbundle_container .cpbundle_toggleBox { bottom: 30px; left: 30px; right: 30px;}
       .cpbundle_cookie_banner { max-width: 300px; }

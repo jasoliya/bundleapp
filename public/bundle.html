@@ -813,17 +813,9 @@
             .then((response) => response.json())
             .then((result) => {
               if(result.error != null) {
+                console.log(typeof result.error);
                 if(typeof result.error['line_items'] != 'undefined') {
-                  let msg = '';
-                  for(qty in result.error['line_items']) {
-                    console.log(result.error['line_items'][qty]);
-                    result.error['line_items'][qty]['quantity'].forEach(function(errorLine, index, arr){
-                      msg += errorLine['message'];
-                      
-                      if(index < (arr.length - 1)) msg += '\n';
-                    });
-                  }
-                  throw new Error(msg);
+                  throw new Error('Some items from your bundle are running out of stock.');
                 } else {
                   throw new Error(result.error);
                 }

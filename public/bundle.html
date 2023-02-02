@@ -816,7 +816,7 @@
                 if(typeof result.error['line_items'] != 'undefined') {
                   let msg = '';
                   for(qty in result.error['line_items']) {
-                    console.log(result.error['line_items'][qty]['quantity']);
+                    console.log(result.error['line_items'][qty]);
                     result.error['line_items'][qty]['quantity'].forEach(function(errorLine, index, arr){
                       msg += errorLine['message'];
                       

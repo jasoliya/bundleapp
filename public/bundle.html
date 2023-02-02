@@ -308,6 +308,7 @@
                   {{ general_settings.text_min_required | default: 'Minimum [amount] [unit] is required to checkout.' | replace: '[amount]', amount | replace: '[unit]', unit }}
                 </p>
               {% endif %}
+              <p class="cpbundle_alert cpbundle_errorMsg cpbundle_hide"></p>
             </div>
           </div>
         </div>
@@ -728,11 +729,18 @@
     });
 
     let checkoutBtn = document.querySelector('.cpbundle_checkoutButton');
+    let alertMsg = document.querySelector('.cpbundle_alert');
     if(checkoutBtn != null) {
       checkoutBtn.addEventListener('click',function(){
         let _this = this;
 
         if(_this.disabled) return;
+
+        if(alertMsg != null) {
+          alertMsg.classList.add('cpbundle_hide');
+          alertMsg.innerText = '';
+        }
+
         _this.classList.add('cpbundle_loading');
         _this.disabled = true;
         
@@ -809,7 +817,10 @@
               //_this.disabled = false;
             })
             .catch((error) => {
-              console.log(error);
+              if(alertMsg != null) {
+                alertMsg.classList.remove('cpbundle_hide');
+                alertMsg.innerText = error;
+              }
               _this.classList.remove('cpbundle_loading');
               //_this.disabled = false;
             });

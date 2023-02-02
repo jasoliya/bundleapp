@@ -820,8 +820,10 @@
             .catch((error) => {
               if(alertMsg != null) {
                 alertMsg.classList.remove('cpbundle_hide');
-                if(typeof error['line_items']) {
-
+                if(typeof error['line_items'] != 'undefined') {
+                  for(qty in error['line_items']) {
+                    console.log(error['line_items'][qty]['quantity']['message']);
+                  }
                 } else {
                   alertMsg.innerText = error;
                 }

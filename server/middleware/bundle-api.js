@@ -420,7 +420,7 @@ export default function bundleApiEndpoints(app) {
         } catch (e) {
             status = 500;
             error = e.message;
-            console.log(e.response);
+            console.log(e.response.body);
         }
         
         res.status(200).send({ success: status === 200, data, error });

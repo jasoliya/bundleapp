@@ -817,9 +817,10 @@
               //_this.disabled = false;
             })
             .catch((e) => {
+              console.log(e);
               if(alertMsg != null) {
                 alertMsg.classList.remove('cpbundle_hide');
-                alertMsg.innerText = e.error;
+                alertMsg.innerText = e;
               }
               _this.classList.remove('cpbundle_loading');
               //_this.disabled = false;

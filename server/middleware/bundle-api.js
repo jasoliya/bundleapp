@@ -422,6 +422,6 @@ export default function bundleApiEndpoints(app) {
             error = e.message;
         }
         
-        res.status(status).send({ success: status === 200, data, error });
+        res.status(200).send({ success: status === 200, data, error });
     });
 }

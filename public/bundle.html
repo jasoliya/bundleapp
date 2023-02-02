@@ -816,11 +816,10 @@
               _this.classList.remove('cpbundle_loading');
               //_this.disabled = false;
             })
-            .catch((e) => {
-              console.log(e);
+            .catch((error) => {
               if(alertMsg != null) {
                 alertMsg.classList.remove('cpbundle_hide');
-                alertMsg.innerText = e;
+                alertMsg.innerText = error;
               }
               _this.classList.remove('cpbundle_loading');
               //_this.disabled = false;

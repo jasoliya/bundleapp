@@ -128,7 +128,7 @@ export default function indexPage() {
                         </div>
                     </Card>
                     <Card title="Have any questions?" sectioned>
-                        <Text>If you have any questions, check out the <Link external>documentation</Link> or write to us at <Link url="mailto:contact@codifyinfotech.com">contact@codifyinfotech.com</Link>.</Text>
+                        <Text>If you have any questions, check out the <Link url="https://apps.codifyinfotech.com" external>documentation</Link> or write to us at <Link url="mailto:contact@codifyinfotech.com">contact@codifyinfotech.com</Link>.</Text>
                     </Card>
                     <Card title="Would you consider leaving us a review?" sectioned>
                         <Stack vertical>

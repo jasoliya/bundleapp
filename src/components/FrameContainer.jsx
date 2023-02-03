@@ -17,8 +17,6 @@ export default function FrameContainer({ children }) {
     const { pathname } = useLocation();
     const isLargeScreen = useMedia('(min-width: 48em)');
 
-    const isBundlePage = pathname.match(/^\/bundles\/(new|[0-9]+)$/);
-
     const toggleMobileNavigationActive = useCallback(
         () => setMobileNavActive(
             (mobileNavActive) => !mobileNavActive
@@ -79,8 +77,12 @@ export default function FrameContainer({ children }) {
         >
             {children}
 
-            {!isBundlePage && pathname !== '/' && pathname !== '/help' && (
-                <FooterHelp>Need help? Check out the <Link external>documentation</Link>.</FooterHelp>
+            {pathname.indexOf('/bundles') >= 0 ? (
+                <FooterHelp>Learn more about <Link url="https://apps.codifyinfotech.com/#creating-bundle-page" external>bundles</Link></FooterHelp>
+            ) : pathname.indexOf('/settings') >= 0 ? (
+                <FooterHelp>Learn more about <Link url="https://apps.codifyinfotech.com/#customising-settings" external>settings</Link></FooterHelp>
+            ) : (
+                <FooterHelp>Need help? Check out the <Link url="https://apps.codifyinfotech.com" external>documentation</Link></FooterHelp>
             )}
         </Frame>
     )

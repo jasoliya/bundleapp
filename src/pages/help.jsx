@@ -11,7 +11,7 @@ export default function help() {
                 <Layout.AnnotatedSection
                     id="help"
                     title="Need help?"
-                    description={<Text>If you have any queries or encounter any problems, Please refer to the <Link url="https://www.doc.com" external>documentation</Link> or contact our support team.</Text>}
+                    description={<Text>If you have any queries or encounter any problems, Please refer to the <Link url="https://apps.codifyinfotech.com/" external>documentation</Link> or contact our support team.</Text>}
                 >
                     <Card sectioned>
                         <Stack spacing="loose" vertical>

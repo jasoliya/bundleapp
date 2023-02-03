@@ -760,12 +760,13 @@
               lineElem = document.querySelector('.cpbundle_boxLine[data-id="'+productId+'"][data-item-id="'+variantId+'"]');
               reducedAmount = lineElem.querySelector('.cpbundle_boxItemPrice').getAttribute('data-reduced-amount');
               if(lineElem != null) {
-                console.log(reducedAmount);
                 if(typeof reducedAmount != 'undefined' && reducedAmount != null) {
-                  lineItems[counter]['applied_discounts'][0] = {
-                    amount: Number(reducedAmount),
-                    description: cpbundle_settings.discount_name,
-                    application_type: "manual" 
+                  if(parseInt(reducedAmount) > 0) {
+                    lineItems[counter]['applied_discounts'][0] = {
+                      amount: Number(reducedAmount),
+                      description: cpbundle_settings.discount_name,
+                      application_type: "manual" 
+                    }
                   }
                 }
               }

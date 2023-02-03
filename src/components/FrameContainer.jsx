@@ -77,7 +77,7 @@ export default function FrameContainer({ children }) {
         >
             {children}
 
-            {pathname.indexOf('/help') === -1 &&
+            {(pathname.indexOf('/help') === -1 && pathname !== '/') && (
                 pathname.indexOf('/bundles') >= 0 ? (
                     <FooterHelp>Learn more about <Link url="https://apps.codifyinfotech.com/#creating-bundle-page" external>bundles</Link></FooterHelp>
                 ) : pathname.indexOf('/settings') >= 0 ? (
@@ -85,7 +85,7 @@ export default function FrameContainer({ children }) {
                 ) : (
                     <FooterHelp>Need help? Check out the <Link url="https://apps.codifyinfotech.com" external>documentation</Link></FooterHelp>
                 )
-            }
+            )}
         </Frame>
     )
 }

@@ -77,13 +77,15 @@ export default function FrameContainer({ children }) {
         >
             {children}
 
-            {pathname.indexOf('/bundles') >= 0 ? (
-                <FooterHelp>Learn more about <Link url="https://apps.codifyinfotech.com/#creating-bundle-page" external>bundles</Link></FooterHelp>
-            ) : pathname.indexOf('/settings') >= 0 ? (
-                <FooterHelp>Learn more about <Link url="https://apps.codifyinfotech.com/#customising-settings" external>settings</Link></FooterHelp>
-            ) : (
-                <FooterHelp>Need help? Check out the <Link url="https://apps.codifyinfotech.com" external>documentation</Link></FooterHelp>
-            )}
+            {pathname.indexOf('/help') === -1 &&
+                pathname.indexOf('/bundles') >= 0 ? (
+                    <FooterHelp>Learn more about <Link url="https://apps.codifyinfotech.com/#creating-bundle-page" external>bundles</Link></FooterHelp>
+                ) : pathname.indexOf('/settings') >= 0 ? (
+                    <FooterHelp>Learn more about <Link url="https://apps.codifyinfotech.com/#customising-settings" external>settings</Link></FooterHelp>
+                ) : (
+                    <FooterHelp>Need help? Check out the <Link url="https://apps.codifyinfotech.com" external>documentation</Link></FooterHelp>
+                )
+            }
         </Frame>
     )
 }
